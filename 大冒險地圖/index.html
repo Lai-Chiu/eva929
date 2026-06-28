@@ -483,6 +483,8 @@
   </div>
 </div>
 
+<audio id="endingBgm" src="ending_bgm.mp3" loop preload="auto"></audio>
+
 <script>
   const CERTS = [
     { key: 'cert_dynasty', slot: 'dynasty', emoji: '📜', name: '朝代之印' },
@@ -781,6 +783,11 @@
     currentEndingIndex = 0;
     showEndingScene(0);
     endingOverlay.classList.add('show');
+    
+    // Play BGM
+    const bgm = document.getElementById('endingBgm');
+    bgm.volume = 0.6; // 設定音量 60%
+    bgm.play().catch(e => console.log('Browser blocked autoplay', e));
   }
 
   function showEndingScene(index) {
