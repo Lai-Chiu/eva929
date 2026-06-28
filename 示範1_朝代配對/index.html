@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>朝代配對</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #130d0b;
+      --panel: #211714;
+      --panel-2: #2d1d18;
+      --gold: #d8ad55;
+      --gold-soft: #ffe3a1;
+      --paper: #f3dfb8;
+      --red: #b9342d;
+      --red-bright: #ff6058;
+      --green: #4f9d62;
+      --green-dark: #23472d;
+      --text: #fff2d2;
+      --muted: #d8bea0;
+      --shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
+      font-family: "Noto Serif TC", "PMingLiU", "Microsoft JhengHei", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(216, 173, 85, 0.18), transparent 26rem),
+        radial-gradient(circle at 86% 6%, rgba(185, 52, 45, 0.16), transparent 22rem),
+        repeating-linear-gradient(90deg, rgba(255, 227, 161, 0.035) 0 1px, transparent 1px 42px),
+        linear-gradient(145deg, #0e0908 0%, var(--bg) 50%, #23110e 100%);
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      background: rgba(33,23,20,0.88);
+      color: var(--gold-soft);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.35);
+    }
+
+    .back-btn:hover {
+      background: rgba(60,40,32,0.95);
+      transform: translateY(-2px);
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(216, 173, 85, 0.42);
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 7vw, 5rem);
+      line-height: 1;
+      letter-spacing: 0;
+      color: var(--gold-soft);
+      text-shadow: 0 4px 0 rgba(185, 52, 45, 0.38), 0 0 30px rgba(216, 173, 85, 0.2);
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stat {
+      min-width: 124px;
+      padding: 10px 14px;
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      background: rgba(33, 23, 20, 0.88);
+      box-shadow: inset 0 0 0 1px rgba(255, 227, 161, 0.18);
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--gold-soft);
+      font-size: 1.65rem;
+      line-height: 1.1;
+    }
+
+    .game {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(310px, 0.85fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .dynasties,
+    .event-bank {
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      background: rgba(33, 23, 20, 0.86);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 227, 161, 0.12);
+      padding: 16px;
+      position: relative;
+    }
+
+    .dynasties::before,
+    .event-bank::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(216, 173, 85, 0.25);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .section-title {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--gold-soft);
+      font-size: 1.45rem;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .dynasty-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dynasty-card {
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 32%),
+        var(--paper);
+      color: #4b2717;
+      min-height: 190px;
+      overflow: hidden;
+      box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .dynasty-name {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 10px;
+      border-bottom: 2px solid rgba(75, 39, 23, 0.18);
+      color: #6a2b1f;
+      font-size: clamp(1.75rem, 5vw, 2.55rem);
+      font-weight: 900;
+      background: linear-gradient(180deg, rgba(255, 248, 226, 0.74), rgba(216, 173, 85, 0.18));
+    }
+
+    .drop-zone {
+      min-height: 128px;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 7px;
+      transition: background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .drop-zone.drag-over {
+      background: rgba(216, 173, 85, 0.3);
+      box-shadow: inset 0 0 0 3px rgba(106, 43, 31, 0.2);
+    }
+
+    .drop-zone.wrong {
+      animation: wrongFlash 300ms ease-in-out;
+    }
+
+    .empty-note {
+      width: 100%;
+      color: rgba(75, 39, 23, 0.55);
+      font-size: 0.95rem;
+      text-align: center;
+      margin-top: 26px;
+      pointer-events: none;
+    }
+
+    .event-list {
+      position: relative;
+      z-index: 1;
+      min-height: 560px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .event-card {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      align-items: center;
+      gap: 10px;
+      min-height: 58px;
+      padding: 10px 12px;
+      border: 2px solid var(--red);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2d1d18, #17100e);
+      color: var(--text);
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.22);
+      cursor: grab;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+    }
+
+    .event-card:active {
+      cursor: grabbing;
+    }
+
+    .event-card.dragging {
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+
+    .event-card.correct {
+      grid-template-columns: 28px 1fr;
+      min-height: 36px;
+      padding: 5px 8px;
+      border-color: #74c27d;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: #efffe9;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+      cursor: default;
+      font-size: 0.86rem;
+    }
+
+    .event-card.correct .icon {
+      width: 24px;
+      height: 24px;
+      font-size: 1rem;
+    }
+
+    .event-card.wrong {
+      animation: cardReject 300ms ease-in-out;
+    }
+
+    .icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(255, 227, 161, 0.12);
+      font-size: 1.25rem;
+    }
+
+    .event-text {
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .event-bank.done .event-list {
+      min-height: 160px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(8, 5, 4, 0.72);
+      backdrop-filter: blur(6px);
+      z-index: 20;
+    }
+
+    .modal.show {
+      display: grid;
+    }
+
+    .dialog {
+      width: min(92vw, 460px);
+      text-align: center;
+      border: 3px solid var(--gold-soft);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255, 227, 161, 0.28), transparent 15rem),
+        linear-gradient(145deg, #2d1d18, #160f0d);
+      padding: 28px;
+      box-shadow: 0 0 0 8px rgba(216, 173, 85, 0.16), 0 0 70px rgba(255, 227, 161, 0.32);
+      animation: victoryIn 340ms ease-out, goldFlash 900ms ease-in-out infinite;
+    }
+
+    .dialog h2 {
+      font-size: 2.4rem;
+      margin-bottom: 8px;
+    }
+
+    .dialog p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 1.15rem;
+    }
+
+    .dialog strong {
+      color: var(--gold-soft);
+      font-size: 2rem;
+    }
+
+    .restart {
+      min-height: 48px;
+      padding: 10px 20px;
+      border: 2px solid var(--gold-soft);
+      border-radius: 8px;
+      background: var(--red);
+      color: #fff7df;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    @keyframes wrongFlash {
+      0%, 100% { background: transparent; }
+      45% { background: rgba(255, 96, 88, 0.68); }
+    }
+
+    @keyframes cardReject {
+      0%, 100% { transform: translateX(0); border-color: var(--red); }
+      25% { transform: translateX(-8px); border-color: var(--red-bright); }
+      50% { transform: translateX(8px); border-color: var(--red-bright); }
+      75% { transform: translateX(-5px); border-color: var(--red-bright); }
+    }
+
+    @keyframes victoryIn {
+      from { opacity: 0; scale: 0.86; }
+      to { opacity: 1; scale: 1; }
+    }
+
+    @keyframes goldFlash {
+      0%, 100% { box-shadow: 0 0 0 8px rgba(216, 173, 85, 0.16), 0 0 70px rgba(255, 227, 161, 0.32); }
+      50% { box-shadow: 0 0 0 12px rgba(216, 173, 85, 0.28), 0 0 96px rgba(255, 227, 161, 0.6); }
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        width: min(100% - 24px, 680px);
+        padding-top: 20px;
+      }
+
+      header,
+      .game {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        text-align: center;
+      }
+
+      .stats {
+        justify-content: center;
+      }
+
+      .dynasty-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event-bank {
+        overflow: hidden;
+      }
+
+      .event-list {
+        min-height: 0;
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding: 4px 4px 12px;
+        scroll-snap-type: x proximity;
+      }
+
+      .event-list .event-card {
+        min-width: 220px;
+        scroll-snap-align: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="../大冒險地圖/index.html">← 回到大地圖</a>
+  <main class="app">
+    <header>
+      <div>
+        <h1>朝代配對</h1>
+        <p class="subtitle">把右側事件卡拖到正確朝代。正確會鎖定，錯誤會彈回。</p>
+      </div>
+      <div class="stats" aria-live="polite">
+        <div class="stat">嘗試次數 <strong id="attempts">0</strong></div>
+        <div class="stat">已完成 <strong><span id="matched">0</span>/<span id="total">0</span></strong></div>
+      </div>
+    </header>
+
+    <section class="game">
+      <div class="dynasties">
+        <div class="section-title">
+          <h2>朝代</h2>
+          <p class="hint">每格可放多張事件卡</p>
+        </div>
+        <div class="dynasty-grid" id="dynastyGrid"></div>
+      </div>
+
+      <aside class="event-bank" id="eventBank">
+        <div class="section-title">
+          <h2>事件卡</h2>
+          <p class="hint">拖曳到左側配對</p>
+        </div>
+        <div class="event-list" id="eventList"></div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="dialog">
+      <h2 id="winTitle">過關！</h2>
+      <p>總嘗試次數：<strong id="finalAttempts">0</strong></p>
+      <button class="restart" id="restartButton" type="button">再玩一次</button>
+    </div>
+  </div>
+
+  <script>
+    const dynasties = [
+      { id: 1, name: "秦" },
+      { id: 2, name: "漢" },
+      { id: 3, name: "唐" },
+      { id: 4, name: "宋" },
+      { id: 5, name: "明" },
+      { id: 6, name: "清" }
+    ];
+
+    const events = [
+      { id: "e1", dynasty_id: 1, text: "統一六國", icon: "⚔️" },
+      { id: "e2", dynasty_id: 1, text: "修築萬里長城", icon: "🧱" },
+      { id: "e3", dynasty_id: 1, text: "焚書坑儒", icon: "🔥" },
+      { id: "e4", dynasty_id: 2, text: "張騫通西域", icon: "🐪" },
+      { id: "e5", dynasty_id: 2, text: "文景之治", icon: "📜" },
+      { id: "e6", dynasty_id: 2, text: "罷黜百家獨尊儒術", icon: "📖" },
+      { id: "e7", dynasty_id: 3, text: "貞觀之治", icon: "👑" },
+      { id: "e8", dynasty_id: 3, text: "安史之亂", icon: "💥" },
+      { id: "e9", dynasty_id: 3, text: "玄奘西行取經", icon: "🧘" },
+      { id: "e10", dynasty_id: 4, text: "王安石變法", icon: "📜" },
+      { id: "e11", dynasty_id: 4, text: "岳飛抗金", icon: "🗡️" },
+      { id: "e12", dynasty_id: 5, text: "鄭和下西洋", icon: "⛵" },
+      { id: "e13", dynasty_id: 5, text: "永樂大典編成", icon: "📚" },
+      { id: "e14", dynasty_id: 6, text: "鴉片戰爭", icon: "💣" },
+      { id: "e15", dynasty_id: 6, text: "康熙盛世", icon: "🌅" },
+      { id: "e16", dynasty_id: 6, text: "辛亥革命終結", icon: "🏛️" }
+    ];
+
+    const dynastyGrid = document.querySelector("#dynastyGrid");
+    const eventList = document.querySelector("#eventList");
+    const eventBank = document.querySelector("#eventBank");
+    const attemptsEl = document.querySelector("#attempts");
+    const matchedEl = document.querySelector("#matched");
+    const totalEl = document.querySelector("#total");
+    const modal = document.querySelector("#modal");
+    const finalAttemptsEl = document.querySelector("#finalAttempts");
+    const restartButton = document.querySelector("#restartButton");
+
+    let attempts = 0;
+    let matched = 0;
+    let draggedCard = null;
+    let audioContext = null;
+
+    function startGame() {
+      attempts = 0;
+      matched = 0;
+      draggedCard = null;
+      attemptsEl.textContent = attempts;
+      matchedEl.textContent = matched;
+      totalEl.textContent = events.length;
+      modal.classList.remove("show");
+      eventBank.classList.remove("done");
+      dynastyGrid.innerHTML = "";
+      eventList.innerHTML = "";
+      renderDynasties();
+      renderEvents(shuffle([...events]));
+    }
+
+    function renderDynasties() {
+      dynasties.forEach((dynasty) => {
+        const card = document.createElement("article");
+        card.className = "dynasty-card";
+        card.innerHTML = `
+          <div class="dynasty-name">${dynasty.name}</div>
+          <div class="drop-zone" data-dynasty-id="${dynasty.id}">
+            <div class="empty-note">放入相關事件</div>
+          </div>
+        `;
+
+        const zone = card.querySelector(".drop-zone");
+        zone.addEventListener("dragover", handleDragOver);
+        zone.addEventListener("dragleave", handleDragLeave);
+        zone.addEventListener("drop", handleDrop);
+        dynastyGrid.append(card);
+      });
+    }
+
+    function renderEvents(items) {
+      items.forEach((item) => {
+        eventList.append(createEventCard(item));
+      });
+    }
+
+    function createEventCard(item) {
+      const card = document.createElement("div");
+      card.className = "event-card";
+      card.draggable = true;
+      card.id = item.id;
+      card.dataset.dynastyId = item.dynasty_id;
+      card.innerHTML = `
+        <span class="icon">${item.icon}</span>
+        <span class="event-text">${item.text}</span>
+      `;
+
+      card.addEventListener("dragstart", (event) => {
+        if (card.classList.contains("correct")) return;
+        unlockAudio();
+        draggedCard = card;
+        card.classList.add("dragging");
+        event.dataTransfer.setData("text/plain", card.id);
+        event.dataTransfer.effectAllowed = "move";
+      });
+
+      card.addEventListener("dragend", () => {
+        card.classList.remove("dragging");
+        draggedCard = null;
+      });
+
+      return card;
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.currentTarget.classList.add("drag-over");
+      event.dataTransfer.dropEffect = "move";
+    }
+
+    function handleDragLeave(event) {
+      event.currentTarget.classList.remove("drag-over");
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      const zone = event.currentTarget;
+      zone.classList.remove("drag-over");
+
+      const cardId = event.dataTransfer.getData("text/plain");
+      const card = draggedCard || document.getElementById(cardId);
+      if (!card || card.classList.contains("correct")) return;
+
+      attempts += 1;
+      attemptsEl.textContent = attempts;
+
+      const targetDynastyId = Number(zone.dataset.dynastyId);
+      const cardDynastyId = Number(card.dataset.dynastyId);
+
+      if (targetDynastyId === cardDynastyId) {
+        acceptCard(zone, card);
+      } else {
+        rejectCard(zone, card);
+      }
+    }
+
+    function acceptCard(zone, card) {
+      zone.querySelector(".empty-note")?.remove();
+      card.classList.remove("wrong");
+      card.classList.add("correct");
+      card.draggable = false;
+      zone.append(card);
+      matched += 1;
+      matchedEl.textContent = matched;
+
+      if (matched === events.length) {
+        eventBank.classList.add("done");
+        setTimeout(showVictory, 360);
+      }
+    }
+
+    function rejectCard(zone, card) {
+      playCannonSound();
+      zone.classList.remove("wrong");
+      card.classList.remove("wrong");
+      void zone.offsetWidth;
+      zone.classList.add("wrong");
+      card.classList.add("wrong");
+      eventList.append(card);
+      setTimeout(() => {
+        zone.classList.remove("wrong");
+        card.classList.remove("wrong");
+      }, 320);
+    }
+
+    function showVictory() {
+      finalAttemptsEl.textContent = attempts;
+      modal.classList.add("show");
+      playVictorySound();
+      // 寫入通關憑證
+      localStorage.setItem('cert_dynasty', '1');
+    }
+
+    function shuffle(items) {
+      for (let i = items.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      return items;
+    }
+
+    function unlockAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+    }
+
+    function tone(frequency, duration, type = "sine", gain = 0.08, delay = 0) {
+      if (!audioContext) return;
+      const start = audioContext.currentTime + delay;
+      const oscillator = audioContext.createOscillator();
+      const volume = audioContext.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, start);
+      volume.gain.setValueAtTime(0.0001, start);
+      volume.gain.exponentialRampToValueAtTime(gain, start + 0.018);
+      volume.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(volume);
+      volume.connect(audioContext.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+    }
+
+    function playCannonSound() {
+      unlockAudio();
+      tone(90, 0.16, "sawtooth", 0.16);
+      tone(54, 0.28, "square", 0.12, 0.05);
+      tone(180, 0.08, "triangle", 0.08, 0.02);
+    }
+
+    function playVictorySound() {
+      unlockAudio();
+      tone(392, 0.12, "triangle", 0.08);
+      tone(523, 0.12, "triangle", 0.08, 0.12);
+      tone(659, 0.16, "triangle", 0.08, 0.24);
+      tone(784, 0.24, "triangle", 0.09, 0.38);
+    }
+
+    restartButton.addEventListener("click", startGame);
+    startGame();
+  </script>
+</body>
+</html>

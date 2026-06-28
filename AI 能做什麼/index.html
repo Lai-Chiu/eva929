@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 能做什麼 | Claude + Antigravity</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151719;
+      --panel: #202428;
+      --panel-soft: #262b30;
+      --text: #f8efe3;
+      --muted: #c9bbaa;
+      --line: rgba(248, 239, 227, 0.14);
+      --accent: #f2a65a;
+      --accent-2: #ffd166;
+      --green: #7bd88f;
+      --red: #ff8f7a;
+      --blue: #8ab4ff;
+      --shadow: 0 22px 80px rgba(0, 0, 0, 0.34);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(242, 166, 90, 0.18), transparent 28rem),
+        radial-gradient(circle at 90% 4%, rgba(138, 180, 255, 0.14), transparent 24rem),
+        linear-gradient(145deg, #111315 0%, var(--bg) 52%, #1c1713 100%);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 48px 0 64px;
+    }
+
+    .hero {
+      min-height: 82vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 36px;
+      align-items: center;
+      padding-bottom: 34px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-2);
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      margin-bottom: 18px;
+    }
+
+    .spark {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 7px rgba(242, 166, 90, 0.14);
+      flex: 0 0 auto;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.18;
+      letter-spacing: 0;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 8vw, 5.6rem);
+      max-width: 9.5em;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 680px;
+      font-size: 1.15rem;
+      margin: 22px 0 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #21150b;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .button.secondary {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    .console {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(32, 36, 40, 0.78);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .console-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 42px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .dot:nth-child(2) {
+      background: var(--accent-2);
+    }
+
+    .dot:nth-child(3) {
+      background: var(--green);
+    }
+
+    .console-body {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .prompt {
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: #161a1e;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .prompt strong {
+      color: var(--text);
+    }
+
+    .meter {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: var(--value);
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    section {
+      padding: 34px 0;
+    }
+
+    .section-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: clamp(1.65rem, 4vw, 2.6rem);
+    }
+
+    .section-title p {
+      max-width: 520px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      min-height: 100%;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(32, 36, 40, 0.76);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      color: #251707;
+      background: var(--accent-2);
+      font-size: 0.82rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .tag.blue {
+      background: var(--blue);
+    }
+
+    .tag.green {
+      background: var(--green);
+    }
+
+    .tag.red {
+      background: var(--red);
+    }
+
+    .card h3 {
+      font-size: 1.18rem;
+      margin-bottom: 8px;
+    }
+
+    .card p,
+    .card li {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .card ul {
+      padding-left: 1.2rem;
+      margin: 10px 0 0;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .feature {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 16px;
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(38, 43, 48, 0.74);
+    }
+
+    .feature strong {
+      color: var(--accent-2);
+      font-size: 1.03rem;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .plugin {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .icon {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: rgba(242, 166, 90, 0.15);
+      border: 1px solid rgba(242, 166, 90, 0.35);
+      color: var(--accent-2);
+      font-weight: 900;
+    }
+
+    .dos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .do {
+      border-left: 4px solid var(--green);
+    }
+
+    .dont {
+      border-left: 4px solid var(--red);
+    }
+
+    footer {
+      margin-top: 28px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(242, 166, 90, 0.1);
+      color: var(--muted);
+    }
+
+    @media (max-width: 880px) {
+      .page {
+        width: min(100% - 28px, 720px);
+        padding-top: 28px;
+      }
+
+      .hero,
+      .grid,
+      .grid.two,
+      .dos {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 40px 0 18px;
+      }
+
+      .feature {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <div class="eyebrow"><span class="spark"></span>Claude + Antigravity 教學工作站</div>
+        <h1>AI 能做什麼</h1>
+        <p>我是 Claude，一位可以和老師一起備課、設計活動、整理資料、產出程式與網頁的 AI 助手。結合 Antigravity 之後，我不只回答問題，也能讀取專案、建立檔案、修改程式、預覽結果，像一位坐在旁邊的教學與技術助教。</p>
+        <div class="hero-actions">
+          <a class="button" href="#abilities">看看能幫什麼</a>
+          <a class="button secondary" href="#talk">學會怎麼提問</a>
+        </div>
+      </div>
+
+      <div class="console" aria-label="Claude 和 Antigravity 的工作流程示意">
+        <div class="console-top">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <div class="console-body">
+          <div class="prompt"><strong>老師：</strong>請幫我把康軒國文第四課做成 15 分鐘複習遊戲。</div>
+          <div class="prompt"><strong>Claude：</strong>我會先拆學習重點，再做題庫、規則、頁面和互動。</div>
+          <div class="meter" aria-hidden="true"><span style="--value: 88%"></span></div>
+          <div class="prompt"><strong>Antigravity：</strong>建立 index.html，完成後在本機瀏覽器預覽。</div>
+        </div>
+      </div>
+    </header>
+
+    <section id="who">
+      <div class="section-title">
+        <h2>我是誰，能一起完成什麼</h2>
+        <p>把 AI 當成會討論、會整理、會動手做的夥伴，而不是只會丟答案的搜尋框。</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">思考夥伴</span>
+          <h3>把模糊想法變成清楚方案</h3>
+          <p>例如老師只說「想讓學生更投入文言文」，我可以整理成暖身、文本理解、分組挑戰、出口票的完整流程。</p>
+        </article>
+        <article class="card">
+          <span class="tag blue">製作助教</span>
+          <h3>把方案變成可用教材</h3>
+          <p>例如產出學習單、簡報大綱、題庫、閱讀材料、互動網頁，並依年級與班級程度調整語氣和難度。</p>
+        </article>
+        <article class="card">
+          <span class="tag green">技術搭檔</span>
+          <h3>直接建立與修改作品</h3>
+          <p>透過 Antigravity，我可以建立資料夾、寫 HTML、修 CSS、檢查錯誤，讓作品不只停在文字建議。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="abilities">
+      <div class="section-title">
+        <h2>我能做的事</h2>
+        <p>以下是老師日常最常用得到的能力，每一項都附上可直接想像的教學例子。</p>
+      </div>
+      <div class="feature-list">
+        <div class="feature">
+          <strong>出考卷與題庫</strong>
+          <p>依課文、能力指標或會考題型出選擇、填充、閱讀理解、素養題，並附答案與解析。</p>
+        </div>
+        <div class="feature">
+          <strong>班級經營</strong>
+          <p>設計座位調整原則、班級公約討論活動、獎勵制度、衝突處理對話腳本。</p>
+        </div>
+        <div class="feature">
+          <strong>家長聯絡</strong>
+          <p>協助撰寫親師溝通訊息，例如提醒作業缺交、說明學生進步、邀請家長共同支持。</p>
+        </div>
+        <div class="feature">
+          <strong>教材製作</strong>
+          <p>把課文轉成重點整理、表格、學習單、簡報架構、複習卡和差異化補充材料。</p>
+        </div>
+        <div class="feature">
+          <strong>課程設計</strong>
+          <p>設計 5 分鐘暖身、45 分鐘完整教案、分組任務、形成性評量與延伸作業。</p>
+        </div>
+        <div class="feature">
+          <strong>活動與遊戲</strong>
+          <p>製作搶答、配對、賓果、密室解謎、闖關任務，讓複習不只是一張考卷。</p>
+        </div>
+        <div class="feature">
+          <strong>評語與回饋</strong>
+          <p>依學生表現產生具體、溫和、有方向的段考評語、作文回饋或學習建議。</p>
+        </div>
+        <div class="feature">
+          <strong>資料整理</strong>
+          <p>把會議紀錄、學生名單、成績描述或課堂觀察整理成表格、摘要與待辦清單。</p>
+        </div>
+        <div class="feature">
+          <strong>程式與網頁</strong>
+          <p>建立課堂小遊戲、班級抽籤器、計分板、互動題庫和可離線開啟的教學頁面。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="plugins">
+      <div class="section-title">
+        <h2>推薦安裝的 Antigravity 插件</h2>
+        <p>優先安裝能提升備課、製作、檢查與展示效率的工具。</p>
+      </div>
+      <div class="grid two">
+        <article class="card plugin">
+          <div class="icon">1</div>
+          <div>
+            <h3>Live Preview / Browser Preview</h3>
+            <p>做 HTML、互動遊戲或教材頁時，可以立即看到畫面，不必一直手動找檔案重新開啟。</p>
+          </div>
+        </article>
+        <article class="card plugin">
+          <div class="icon">2</div>
+          <div>
+            <h3>Prettier</h3>
+            <p>自動整理 HTML、CSS、JavaScript 的格式，學生作品和老師範例都會更容易閱讀。</p>
+          </div>
+        </article>
+        <article class="card plugin">
+          <div class="icon">3</div>
+          <div>
+            <h3>Markdown All in One</h3>
+            <p>適合整理講義、課程筆記、班級公告和教學流程，能快速產生清楚的標題與目錄。</p>
+          </div>
+        </article>
+        <article class="card plugin">
+          <div class="icon">4</div>
+          <div>
+            <h3>Chinese Language Pack</h3>
+            <p>介面中文化能降低第一次使用的壓力，課堂示範時學生也比較容易跟上操作。</p>
+          </div>
+        </article>
+        <article class="card plugin">
+          <div class="icon">5</div>
+          <div>
+            <h3>GitLens</h3>
+            <p>若之後要保存版本或比較學生作品變化，GitLens 能看出每次修改的脈絡與差異。</p>
+          </div>
+        </article>
+        <article class="card plugin">
+          <div class="icon">6</div>
+          <div>
+            <h3>Code Spell Checker</h3>
+            <p>製作英文教材或雙語頁面時，可以減少拼字錯誤，也適合檢查網頁中的英文按鈕文字。</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="talk">
+      <div class="section-title">
+        <h2>怎麼跟我說話效果最好</h2>
+        <p>給我的條件越接近日常教學現場，我就越能產出可直接使用的內容。</p>
+      </div>
+      <div class="dos">
+        <article class="card do">
+          <h3>Do：說明年級、課程、目標</h3>
+          <p>例如：「國一國文，學生剛學完記承天夜遊，我想做 20 分鐘複習活動，目標是理解景物描寫。」</p>
+        </article>
+        <article class="card dont">
+          <h3>Don't：只說幫我做教材</h3>
+          <p>沒有年級、文本、時間與目的時，我只能先猜，成果會比較像通用範本。</p>
+        </article>
+        <article class="card do">
+          <h3>Do：給我限制與格式</h3>
+          <p>例如：「要 10 題選擇、5 題短答、附答案解析，難度中等，適合 15 分鐘小考。」</p>
+        </article>
+        <article class="card dont">
+          <h3>Don't：一次混合太多目標</h3>
+          <p>若同時要考卷、簡報、遊戲和家長通知，最好分段請我做，品質會更穩。</p>
+        </article>
+        <article class="card do">
+          <h3>Do：把學生狀況告訴我</h3>
+          <p>例如：「這班閱讀速度慢、容易分心、喜歡競賽。」我可以調整活動節奏和任務難度。</p>
+        </article>
+        <article class="card dont">
+          <h3>Don't：把敏感個資直接貼上來</h3>
+          <p>需要討論個案時，用代稱與概況即可，例如「A 生常缺交作業」，避免放完整姓名與私人資料。</p>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      一句好用的開場白：請你扮演國中國文老師的備課助理，根據以下課程目標與學生狀況，產出可以直接上課使用的教材，並附上操作步驟與可修改版本。
+    </footer>
+  </main>
+</body>
+</html>

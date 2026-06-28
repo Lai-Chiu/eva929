@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>打地鼠</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f8e9c8;
+      --paper-deep: #efd6a8;
+      --ink: #5c3f2a;
+      --wood: #a66a3f;
+      --wood-dark: #6f4229;
+      --wood-light: #d39862;
+      --red: #df4d45;
+      --pink: #f6909b;
+      --orange: #f39b3d;
+      --matcha: #86aa55;
+      --cream: #fff8e8;
+      font-family: "Kosugi Maru", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 16%, rgba(255, 255, 255, 0.55) 0 52px, transparent 54px),
+        radial-gradient(circle at 86% 10%, rgba(255, 255, 255, 0.45) 0 42px, transparent 44px),
+        linear-gradient(90deg, rgba(129, 82, 49, 0.06) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(129, 82, 49, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, #fbefd3 0%, var(--paper) 60%, var(--paper-deep) 100%);
+      background-size: auto, auto, 34px 34px, 34px 34px, auto;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+    }
+
+    body.shake {
+      animation: screenShake 260ms ease-in-out;
+    }
+
+    body.urgent::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      pointer-events: none;
+      background:
+        radial-gradient(circle, transparent 42%, rgba(223, 77, 69, 0.34) 100%),
+        rgba(223, 77, 69, 0.12);
+      animation: dangerPulse 420ms ease-in-out infinite;
+    }
+
+    .game {
+      width: min(94vw, 780px);
+      padding: 24px;
+      position: relative;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.3rem, 8vw, 4.6rem);
+      line-height: 1;
+      letter-spacing: 0;
+      color: #74462b;
+      text-shadow: 0 4px 0 #fff7df, 0 8px 0 rgba(115, 69, 42, 0.16);
+    }
+
+    .scoreboard {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      min-width: 112px;
+      padding: 10px 14px;
+      border: 4px solid #fff7df;
+      border-radius: 999px;
+      background: rgba(255, 248, 232, 0.94);
+      box-shadow: 0 7px 0 rgba(116, 70, 43, 0.18);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .pill span {
+      color: var(--red);
+      font-size: 1.4rem;
+    }
+
+    .pill.warning {
+      animation: redFlash 480ms ease-in-out infinite;
+    }
+
+    .stage {
+      border: 6px solid #fff7df;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 12% 22%, rgba(255, 255, 255, 0.34) 0 18px, transparent 20px),
+        radial-gradient(circle at 87% 82%, rgba(255, 255, 255, 0.24) 0 22px, transparent 24px),
+        linear-gradient(135deg, rgba(134, 170, 85, 0.12) 25%, transparent 25% 50%, rgba(134, 170, 85, 0.12) 50% 75%, transparent 75%),
+        #e9c98f;
+      background-size: auto, auto, 42px 42px, auto;
+      box-shadow: 0 18px 0 rgba(116, 70, 43, 0.17), 0 26px 54px rgba(116, 70, 43, 0.23);
+      padding: clamp(18px, 4vw, 34px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body.urgent .stage {
+      animation: stageWarning 420ms ease-in-out infinite;
+    }
+
+    .stage::before {
+      content: "ぽん!";
+      position: absolute;
+      right: 18px;
+      top: 12px;
+      color: rgba(116, 70, 43, 0.16);
+      font-size: clamp(2rem, 7vw, 4rem);
+      rotate: 8deg;
+      font-weight: 900;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(12px, 3vw, 24px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .hole {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      touch-action: manipulation;
+      outline-offset: 4px;
+    }
+
+    .hole::before {
+      content: "";
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      bottom: 9%;
+      height: 38%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at 50% 42%, rgba(70, 39, 23, 0.34) 0 34%, transparent 35%),
+        repeating-radial-gradient(ellipse at 50% 52%, var(--wood-light) 0 8px, var(--wood) 9px 16px, var(--wood-dark) 17px 20px);
+      box-shadow:
+        inset 0 12px 0 rgba(255, 230, 181, 0.38),
+        inset 0 -11px 0 rgba(83, 47, 29, 0.35),
+        0 10px 0 rgba(116, 70, 43, 0.22);
+      z-index: 2;
+    }
+
+    .hole::after {
+      content: "";
+      position: absolute;
+      left: 15%;
+      right: 15%;
+      bottom: 5%;
+      height: 20%;
+      border-radius: 50%;
+      background: rgba(92, 63, 42, 0.18);
+      filter: blur(1px);
+      z-index: 1;
+    }
+
+    .mole {
+      position: absolute;
+      left: 50%;
+      bottom: 17%;
+      width: 70%;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      translate: -50% 92%;
+      scale: 0.72;
+      opacity: 0;
+      font-size: clamp(3.1rem, 11vw, 5.8rem);
+      line-height: 1;
+      transform-origin: 50% 100%;
+      transition: translate 260ms cubic-bezier(.18, 1.25, .26, 1), scale 260ms cubic-bezier(.18, 1.25, .26, 1), opacity 120ms ease;
+      z-index: 3;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 0 rgba(92, 63, 42, 0.18));
+    }
+
+    .hole.up .mole {
+      translate: -50% -3%;
+      scale: 1;
+      opacity: 1;
+      animation: moleBounce 360ms cubic-bezier(.2, 1.35, .2, 1), wiggle 720ms 360ms ease-in-out infinite;
+    }
+
+    .hole.hit .mole {
+      opacity: 0;
+    }
+
+    .flying-mole {
+      position: fixed;
+      z-index: 20;
+      font-size: clamp(3rem, 10vw, 5.6rem);
+      line-height: 1;
+      pointer-events: none;
+      animation: flyMole 680ms ease-out forwards;
+      filter: drop-shadow(0 8px 0 rgba(92, 63, 42, 0.18));
+    }
+
+    .float {
+      position: absolute;
+      left: 50%;
+      top: 14%;
+      translate: -50% 0;
+      z-index: 6;
+      font-weight: 1000;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+      color: #fff8e8;
+      -webkit-text-stroke: 5px var(--red);
+      paint-order: stroke fill;
+      pointer-events: none;
+      animation: floatUp 720ms ease-out forwards;
+    }
+
+    .float.minus {
+      -webkit-text-stroke-color: #446b89;
+    }
+
+    .particle {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--pink);
+      pointer-events: none;
+      z-index: 21;
+      animation: particleBurst 720ms ease-out forwards;
+    }
+
+    .combo {
+      position: fixed;
+      top: min(18vh, 120px);
+      left: 50%;
+      translate: -50% 0;
+      z-index: 30;
+      padding: 10px 20px;
+      border: 4px solid #fff8e8;
+      border-radius: 999px;
+      color: #fff8e8;
+      background: linear-gradient(135deg, #df4d45, #f39b3d);
+      box-shadow: 0 10px 0 rgba(116, 70, 43, 0.22);
+      font-size: clamp(1.35rem, 5vw, 2.6rem);
+      font-weight: 1000;
+      pointer-events: none;
+      animation: comboPop 900ms ease-out forwards;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button.action {
+      min-height: 50px;
+      padding: 10px 22px;
+      border: 4px solid #fff7df;
+      border-radius: 999px;
+      background: linear-gradient(#ffbd6b, var(--orange));
+      color: #5b351e;
+      box-shadow: 0 8px 0 rgba(124, 68, 25, 0.33);
+      font: inherit;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    button.action:active {
+      translate: 0 4px;
+      box-shadow: 0 4px 0 rgba(124, 68, 25, 0.33);
+    }
+
+    .hint {
+      margin: 0;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 248, 232, 0.78);
+      font-weight: 800;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(92, 63, 42, 0.48);
+      backdrop-filter: blur(5px);
+      z-index: 40;
+    }
+
+    .modal.show {
+      display: grid;
+    }
+
+    .dialog {
+      width: min(92vw, 430px);
+      text-align: center;
+      padding: 28px;
+      border: 6px solid #fff7df;
+      border-radius: 28px;
+      background: var(--cream);
+      box-shadow: 0 18px 0 rgba(116, 70, 43, 0.22);
+      animation: pop 240ms ease-out;
+    }
+
+    .dialog h2 {
+      margin: 0 0 8px;
+      font-size: 2.2rem;
+      letter-spacing: 0;
+    }
+
+    .dialog p {
+      margin: 0 0 18px;
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .dialog strong {
+      color: var(--red);
+      font-size: 2rem;
+    }
+
+    @keyframes moleBounce {
+      0% { translate: -50% 92%; scale: 0.72; }
+      62% { translate: -50% -12%; scale: 1.08 0.92; }
+      100% { translate: -50% -3%; scale: 1; }
+    }
+
+    @keyframes wiggle {
+      0%, 100% { rotate: -2deg; }
+      50% { rotate: 2deg; }
+    }
+
+    @keyframes flyMole {
+      0% { opacity: 1; rotate: 0deg; scale: 1; transform: translate(0, 0); }
+      100% { opacity: 0; rotate: 720deg; scale: 0.45; transform: translate(var(--fly-x), -180px); }
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; translate: -50% 16px; scale: 0.76; }
+      16% { opacity: 1; }
+      100% { opacity: 0; translate: -50% -52px; scale: 1.18; }
+    }
+
+    @keyframes particleBurst {
+      0% { opacity: 1; scale: 0.6; transform: translate(0, 0); }
+      100% { opacity: 0; scale: 0.15; transform: translate(var(--x), var(--y)); }
+    }
+
+    @keyframes comboPop {
+      0% { opacity: 0; scale: 0.65; }
+      18% { opacity: 1; scale: 1.12; }
+      72% { opacity: 1; scale: 1; }
+      100% { opacity: 0; scale: 0.8; translate: -50% -22px; }
+    }
+
+    @keyframes redFlash {
+      0%, 100% { background: #fff8e8; color: var(--ink); }
+      50% { background: var(--red); color: #fff8e8; scale: 1.04; }
+    }
+
+    @keyframes dangerPulse {
+      0%, 100% { opacity: 0.18; }
+      50% { opacity: 0.9; }
+    }
+
+    @keyframes stageWarning {
+      0%, 100% { box-shadow: 0 18px 0 rgba(116, 70, 43, 0.17), 0 26px 54px rgba(116, 70, 43, 0.23); }
+      50% { box-shadow: 0 18px 0 rgba(223, 77, 69, 0.55), 0 0 0 8px rgba(223, 77, 69, 0.34), 0 26px 54px rgba(223, 77, 69, 0.38); }
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-5px, 2px); }
+      40% { transform: translate(4px, -2px); }
+      60% { transform: translate(-3px, -1px); }
+      80% { transform: translate(3px, 1px); }
+    }
+
+    @keyframes pop {
+      from { opacity: 0; scale: 0.86; }
+      to { opacity: 1; scale: 1; }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        place-items: start center;
+      }
+
+      .game {
+        padding: 18px 12px;
+      }
+
+      header {
+        display: grid;
+        justify-items: center;
+        text-align: center;
+      }
+
+      .scoreboard {
+        justify-content: center;
+      }
+
+      .pill {
+        min-width: 104px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game" aria-label="打地鼠遊戲">
+    <header>
+      <h1>打地鼠</h1>
+      <div class="scoreboard" aria-live="polite">
+        <div class="pill">分數 <span id="score">0</span></div>
+        <div class="pill" id="timePill">時間 <span id="time">30</span></div>
+      </div>
+    </header>
+
+    <section class="stage">
+      <div class="board" id="board"></div>
+    </section>
+
+    <div class="controls">
+      <button class="action" id="startButton" type="button">開始遊戲</button>
+      <p class="hint">打到 +10，點空洞 -5，限時 30 秒</p>
+    </div>
+  </main>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="finalTitle">
+    <div class="dialog">
+      <h2 id="finalTitle">時間到！</h2>
+      <p>你的最終分數是 <strong id="finalScore">0</strong> 分</p>
+      <button class="action" id="restartButton" type="button">重新開始</button>
+    </div>
+  </div>
+
+  <script>
+    const board = document.querySelector("#board");
+    const scoreEl = document.querySelector("#score");
+    const timeEl = document.querySelector("#time");
+    const timePill = document.querySelector("#timePill");
+    const startButton = document.querySelector("#startButton");
+    const restartButton = document.querySelector("#restartButton");
+    const modal = document.querySelector("#modal");
+    const finalScoreEl = document.querySelector("#finalScore");
+
+    const holes = [];
+    let activeHole = null;
+    let score = 0;
+    let timeLeft = 30;
+    let isPlaying = false;
+    let moleTimer = null;
+    let countdownTimer = null;
+    let lastHoleIndex = -1;
+    let combo = 0;
+    let audioContext = null;
+
+    for (let i = 0; i < 9; i += 1) {
+      const hole = document.createElement("button");
+      hole.className = "hole";
+      hole.type = "button";
+      hole.setAttribute("aria-label", `第 ${i + 1} 個洞`);
+      hole.dataset.index = i;
+
+      const mole = document.createElement("span");
+      mole.className = "mole";
+      mole.textContent = "🐹";
+      hole.append(mole);
+
+      hole.addEventListener("click", () => hitHole(hole));
+      board.append(hole);
+      holes.push(hole);
+    }
+
+    function startGame() {
+      unlockAudio();
+      score = 0;
+      timeLeft = 30;
+      combo = 0;
+      isPlaying = true;
+      activeHole = null;
+      lastHoleIndex = -1;
+      scoreEl.textContent = score;
+      timeEl.textContent = timeLeft;
+      timePill.classList.remove("warning");
+      document.body.classList.remove("urgent");
+      modal.classList.remove("show");
+      startButton.textContent = "重新開始";
+      clearTimers();
+      hideMole();
+      showMole();
+
+      countdownTimer = setInterval(() => {
+        timeLeft -= 1;
+        timeEl.textContent = timeLeft;
+
+        if (timeLeft <= 5 && timeLeft > 0) {
+          timePill.classList.add("warning");
+          document.body.classList.add("urgent");
+          playTickSound();
+        }
+
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function showMole() {
+      if (!isPlaying) return;
+
+      hideMole();
+      const hole = getRandomHole();
+      activeHole = hole;
+      hole.classList.add("up");
+      playPopSound();
+
+      moleTimer = setTimeout(() => {
+        combo = 0;
+        hideMole();
+        showMole();
+      }, 1500);
+    }
+
+    function getRandomHole() {
+      let index = Math.floor(Math.random() * holes.length);
+      if (holes.length > 1) {
+        while (index === lastHoleIndex) {
+          index = Math.floor(Math.random() * holes.length);
+        }
+      }
+      lastHoleIndex = index;
+      return holes[index];
+    }
+
+    function hitHole(hole) {
+      if (!isPlaying) return;
+
+      if (hole === activeHole && hole.classList.contains("up")) {
+        score += 10;
+        combo += 1;
+        scoreEl.textContent = score;
+        hole.classList.add("hit");
+        showFloat(hole, "+10");
+        launchMole(hole);
+        burstParticles(hole, combo >= 3 ? 24 : 14);
+        playHitSound();
+
+        if (combo >= 3) {
+          showCombo(combo);
+          burstParticles(hole, 18, true);
+        }
+
+        setTimeout(() => hole.classList.remove("hit"), 180);
+        hideMole();
+        clearTimeout(moleTimer);
+        moleTimer = setTimeout(showMole, 220);
+        return;
+      }
+
+      score -= 5;
+      combo = 0;
+      scoreEl.textContent = score;
+      showFloat(hole, "-5", true);
+      playOopsSound();
+      shakeScreen();
+    }
+
+    function hideMole() {
+      holes.forEach((hole) => hole.classList.remove("up"));
+      activeHole = null;
+    }
+
+    function showFloat(hole, text, isMinus = false) {
+      const label = document.createElement("span");
+      label.className = `float${isMinus ? " minus" : ""}`;
+      label.textContent = text;
+      hole.append(label);
+      setTimeout(() => label.remove(), 760);
+    }
+
+    function launchMole(hole) {
+      const rect = hole.getBoundingClientRect();
+      const mole = document.createElement("span");
+      mole.className = "flying-mole";
+      mole.textContent = "🐹";
+      mole.style.left = `${rect.left + rect.width * 0.5}px`;
+      mole.style.top = `${rect.top + rect.height * 0.22}px`;
+      mole.style.setProperty("--fly-x", `${Math.random() > 0.5 ? 90 : -90}px`);
+      document.body.append(mole);
+      setTimeout(() => mole.remove(), 720);
+    }
+
+    function burstParticles(hole, count, comboMode = false) {
+      const rect = hole.getBoundingClientRect();
+      const colors = comboMode
+        ? ["#df4d45", "#f39b3d", "#fff176", "#f6909b"]
+        : ["#f6909b", "#f39b3d", "#fff8e8", "#86aa55"];
+
+      for (let i = 0; i < count; i += 1) {
+        const particle = document.createElement("span");
+        const angle = Math.random() * Math.PI * 2;
+        const distance = comboMode ? 92 + Math.random() * 54 : 44 + Math.random() * 58;
+        particle.className = "particle";
+        particle.style.left = `${rect.left + rect.width * 0.5}px`;
+        particle.style.top = `${rect.top + rect.height * 0.35}px`;
+        particle.style.background = colors[i % colors.length];
+        particle.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+        document.body.append(particle);
+        setTimeout(() => particle.remove(), 760);
+      }
+    }
+
+    function showCombo(amount) {
+      document.querySelectorAll(".combo").forEach((item) => item.remove());
+      const comboEl = document.createElement("div");
+      comboEl.className = "combo";
+      comboEl.textContent = `COMBO ×${amount}!`;
+      document.body.append(comboEl);
+      setTimeout(() => comboEl.remove(), 920);
+    }
+
+    function shakeScreen() {
+      document.body.classList.remove("shake");
+      void document.body.offsetWidth;
+      document.body.classList.add("shake");
+      setTimeout(() => document.body.classList.remove("shake"), 280);
+    }
+
+    function clearTimers() {
+      clearTimeout(moleTimer);
+      clearInterval(countdownTimer);
+      moleTimer = null;
+      countdownTimer = null;
+    }
+
+    function endGame() {
+      isPlaying = false;
+      clearTimers();
+      hideMole();
+      combo = 0;
+      timePill.classList.remove("warning");
+      document.body.classList.remove("urgent");
+      finalScoreEl.textContent = score;
+      modal.classList.add("show");
+    }
+
+    function unlockAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+    }
+
+    function tone(frequency, duration, type = "sine", gain = 0.08, delay = 0) {
+      if (!audioContext) return;
+      const start = audioContext.currentTime + delay;
+      const oscillator = audioContext.createOscillator();
+      const volume = audioContext.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, start);
+      volume.gain.setValueAtTime(0.0001, start);
+      volume.gain.exponentialRampToValueAtTime(gain, start + 0.015);
+      volume.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(volume);
+      volume.connect(audioContext.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+    }
+
+    function playPopSound() {
+      tone(520, 0.12, "sine", 0.055);
+      tone(780, 0.12, "triangle", 0.035, 0.055);
+    }
+
+    function playHitSound() {
+      tone(140, 0.08, "square", 0.08);
+      tone(260, 0.1, "triangle", 0.055, 0.035);
+    }
+
+    function playOopsSound() {
+      speakOops();
+      tone(300, 0.1, "sawtooth", 0.045);
+      tone(190, 0.16, "triangle", 0.045, 0.08);
+    }
+
+    function speakOops() {
+      if (!("speechSynthesis" in window)) return;
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance("哎呀");
+      utterance.lang = "zh-TW";
+      utterance.rate = 1.35;
+      utterance.pitch = 1.65;
+      utterance.volume = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function playTickSound() {
+      tone(1180, 0.075, "square", 0.09);
+      tone(620, 0.09, "triangle", 0.06, 0.085);
+    }
+
+    startButton.addEventListener("click", startGame);
+    restartButton.addEventListener("click", startGame);
+  </script>
+</body>
+</html>

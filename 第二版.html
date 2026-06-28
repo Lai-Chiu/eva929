@@ -1,0 +1,3548 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>養黃金鼠國文答題闖關</title>
+  <!-- Import Cute Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-primary: #FFF9F3;
+      --bg-room: #FFEFE0;
+      --bg-wood: #D7CCC8;
+      --primary: #FF9F43;
+      --primary-dark: #E68A2E;
+      --primary-light: #FFECE0;
+      --secondary: #FFD2A8;
+      --accent-pink: #FF8E95;
+      --accent-green: #78E08F;
+      --accent-blue: #60A3BC;
+      --text-dark: #5D4037;
+      --text-medium: #8D6E63;
+      --text-light: #A1887F;
+      --white: #FFFFFF;
+      --border-radius: 24px;
+      --border-radius-sm: 16px;
+      --shadow-soft: 0 12px 32px rgba(141, 110, 99, 0.12);
+      --shadow-button: 0 6px 16px rgba(255, 159, 67, 0.25);
+      --font-cute: 'Fredoka', 'Noto Sans TC', sans-serif;
+      --border-color: #FFECE0;
+    }
+
+    /* Base Setup */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-cute);
+      background-color: var(--bg-primary);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    #game-container {
+      width: 100%;
+      max-width: 1024px;
+      height: 700px;
+      background: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-soft);
+      border: 8px solid var(--secondary);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Screen Views */
+    .screen-view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen-view.active {
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Start Screen */
+    #start-view {
+      background: linear-gradient(135deg, #FFF9F3 0%, #FFEEDD 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .title-area {
+      margin-bottom: 30px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .title-area h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      text-shadow: 3px 3px 0 var(--secondary);
+      margin-bottom: 10px;
+    }
+
+    .title-area p {
+      font-size: 1.4rem;
+      color: var(--text-medium);
+      font-weight: 500;
+    }
+
+    .start-hamster-container {
+      width: 180px;
+      height: 180px;
+      margin-bottom: 40px;
+    }
+
+    /* Intro Screen */
+    #intro-view {
+      background: linear-gradient(135deg, #FFF5EB 0%, #FFEBE0 100%);
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .intro-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .intro-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 25px;
+      text-shadow: 1px 1px 0 var(--white);
+    }
+
+    .intro-hamster-wrapper {
+      width: 160px;
+      height: 160px;
+      margin-bottom: 35px;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .intro-speech-bubble {
+      background: var(--white);
+      border: 4px solid var(--secondary);
+      border-radius: var(--border-radius-sm);
+      padding: 20px 24px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      line-height: 1.6;
+      margin-bottom: 30px;
+      position: relative;
+      box-shadow: var(--shadow-soft);
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .intro-speech-bubble::after {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 12px 16px 12px;
+      border-style: solid;
+      border-color: transparent transparent var(--secondary) transparent;
+    }
+
+    .intro-speech-bubble::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 10px 12px 10px;
+      border-style: solid;
+      border-color: transparent transparent var(--white) transparent;
+      z-index: 1;
+    }
+
+    .intro-progress-container {
+      width: 70%;
+      height: 12px;
+      background: var(--primary-light);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 2px solid var(--secondary);
+    }
+
+    .intro-progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: 10px;
+    }
+
+    .intro-skip-btn {
+      font-family: var(--font-cute);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-medium);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px 20px;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+
+    .intro-skip-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    /* Common Buttons */
+    .btn {
+      font-family: var(--font-cute);
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding: 16px 36px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: var(--shadow-button);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--white);
+      border-bottom: 5px solid var(--primary-dark);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.06) translateY(-3px);
+      box-shadow: 0 10px 22px rgba(255, 159, 67, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98) translateY(2px);
+      border-bottom-width: 1px;
+    }
+
+    .btn-secondary {
+      background-color: var(--white);
+      color: var(--text-dark);
+      border: 3px solid var(--secondary);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--primary-light);
+      transform: scale(1.03);
+    }
+
+    /* Map Screen (Hamster Dream Room) */
+    #map-view {
+      background-color: var(--bg-room);
+      position: relative;
+    }
+
+    .room-background {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 100px;
+      animation: drift 25s linear infinite;
+    }
+
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 100px;
+    }
+
+    .cloud-1 {
+      width: 120px;
+      height: 40px;
+      top: 50px;
+      left: -150px;
+      animation-delay: 0s;
+    }
+    .cloud-1::before { width: 50px; height: 50px; top: -20px; left: 20px; }
+    .cloud-1::after { width: 70px; height: 70px; top: -35px; left: 50px; }
+
+    .cloud-2 {
+      width: 160px;
+      height: 50px;
+      top: 150px;
+      left: -200px;
+      animation-delay: 8s;
+      animation-duration: 35s;
+    }
+    .cloud-2::before { width: 70px; height: 70px; top: -30px; left: 30px; }
+    .cloud-2::after { width: 90px; height: 90px; top: -45px; left: 70px; }
+
+    /* Wooden Floor Plank design */
+    .room-floor {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(0deg, #D7CCC8 0%, #EFEBE9 100%);
+      border-top: 6px solid #8D6E63;
+      z-index: 2;
+    }
+
+    .room-floor::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(141, 110, 99, 0.15) 80px, rgba(141, 110, 99, 0.15) 83px);
+    }
+
+    /* Window, shelf decorations */
+    .room-window {
+      position: absolute;
+      top: 50px;
+      right: 80px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #81D4FA 0%, #B3E5FC 100%);
+      border: 6px solid var(--white);
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.1), var(--shadow-soft);
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .window-hill {
+      position: absolute;
+      bottom: -10px;
+      left: -20px;
+      width: 160px;
+      height: 50px;
+      background: #81C784;
+      border-radius: 50%;
+    }
+
+    .window-cloud {
+      position: absolute;
+      width: 40px;
+      height: 15px;
+      background: var(--white);
+      border-radius: 20px;
+      top: 30px;
+      animation: drift-window 15s linear infinite;
+    }
+
+    /* Toy Hamster Wheel */
+    .hamster-wheel {
+      position: absolute;
+      bottom: 90px;
+      left: 60px;
+      width: 120px;
+      height: 135px;
+      z-index: 3;
+    }
+
+    .hamster-wheel-svg {
+      width: 100%;
+      height: 100%;
+      animation: spin-slow 12s linear infinite;
+      transform-origin: 50% 37%;
+    }
+
+    /* Hanging level map elements */
+    .map-header {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      padding-top: 30px;
+    }
+
+    .map-header h2 {
+      font-size: 2.2rem;
+      color: var(--text-dark);
+      text-shadow: 2px 2px 0 var(--white);
+    }
+
+    .map-header p {
+      font-size: 1.1rem;
+      color: var(--text-medium);
+      margin-top: 5px;
+    }
+
+    .stages-layout {
+      position: absolute;
+      width: 100%;
+      height: calc(100% - 120px);
+      top: 0;
+      left: 0;
+      z-index: 5;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 40px;
+    }
+
+    .stage-card {
+      background: #FFF;
+      border-radius: var(--border-radius-sm);
+      border: 4px solid var(--secondary);
+      box-shadow: var(--shadow-soft);
+      padding: 24px 20px;
+      width: 250px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: float-alternate 4s ease-in-out infinite;
+    }
+
+    .stage-card:nth-child(2) {
+      animation-delay: 0.8s;
+      transform: translateY(-20px);
+    }
+
+    .stage-card:nth-child(3) {
+      animation-delay: 1.6s;
+    }
+
+    .stage-card:hover {
+      transform: translateY(-12px) scale(1.05);
+      box-shadow: 0 18px 40px rgba(141, 110, 99, 0.2);
+      border-color: var(--primary);
+    }
+
+    .stage-badge {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    .stage-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .stage-desc {
+      font-size: 0.9rem;
+      color: var(--text-medium);
+      margin-bottom: 15px;
+    }
+
+    .stage-status {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-pink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .stage-status.completed {
+      color: var(--accent-green);
+    }
+
+    /* Idle Interactive Hamster on Floor */
+    .map-hamster {
+      position: absolute;
+      bottom: 100px;
+      right: 250px;
+      width: 90px;
+      height: 90px;
+      z-index: 4;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .map-hamster:hover {
+      transform: scale(1.1);
+    }
+
+    .map-dialogue {
+      position: absolute;
+      bottom: 195px;
+      right: 200px;
+      background: var(--white);
+      border: 3px solid var(--secondary);
+      border-radius: 18px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      max-width: 200px;
+      box-shadow: var(--shadow-soft);
+      z-index: 5;
+      opacity: 0;
+      transform: scale(0.8) translateY(10px);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+
+    .map-dialogue.show {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .map-dialogue::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 12px 10px 0 10px;
+      border-style: solid;
+      border-color: var(--secondary) transparent transparent transparent;
+    }
+
+    .map-dialogue::before {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 10px 8px 0 8px;
+      border-style: solid;
+      border-color: var(--white) transparent transparent transparent;
+      z-index: 1;
+    }
+
+    /* Quiz Screen Layout */
+    #quiz-view {
+      background: linear-gradient(185deg, #FFFDFB 0%, #FFF5EB 100%);
+    }
+
+    .quiz-navbar {
+      height: 70px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 5;
+    }
+
+    .back-btn {
+      font-family: var(--font-cute);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-medium);
+      background: var(--white);
+      border: 2.5px solid var(--secondary);
+      padding: 6px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .quiz-title-display {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .quiz-progress-top {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      background: var(--primary-light);
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    .quiz-workspace {
+      flex: 1;
+      display: flex;
+      height: calc(100% - 70px);
+      position: relative;
+    }
+
+    /* Left Side: Question Board */
+    .question-panel {
+      flex: 1.2;
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 2px solid var(--border-color);
+    }
+
+    .question-card {
+      background: var(--white);
+      border-radius: var(--border-radius-sm);
+      border: 3px solid var(--border-color);
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.02);
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .question-number {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-pink);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.5;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      font-family: var(--font-cute);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      background: var(--white);
+      border: 2.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--secondary);
+      background-color: var(--bg-primary);
+      transform: translateX(5px);
+    }
+
+    .option-btn:active:not(:disabled) {
+      transform: translateX(1px);
+    }
+
+    .option-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--border-color);
+      color: var(--text-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover .option-letter {
+      background: var(--secondary);
+      color: var(--text-dark);
+    }
+
+    /* Correct/Incorrect Option States */
+    .option-btn.correct {
+      background-color: #E8F5E9 !important;
+      border-color: var(--accent-green) !important;
+      color: #2E7D32 !important;
+    }
+    .option-btn.correct .option-letter {
+      background-color: var(--accent-green) !important;
+      color: var(--white) !important;
+    }
+
+    .option-btn.wrong {
+      background-color: #FFEBEE !important;
+      border-color: var(--accent-pink) !important;
+      color: #C62828 !important;
+    }
+    .option-btn.wrong .option-letter {
+      background-color: var(--accent-pink) !important;
+      color: var(--white) !important;
+    }
+
+    /* Right Side: Hamster Display */
+    .hamster-panel {
+      flex: 0.8;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .interactive-hamster-container {
+      width: 240px;
+      height: 240px;
+      position: relative;
+    }
+
+    .hearts-container, .tears-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .quiz-hamster-speech {
+      background: var(--white);
+      border: 3px solid var(--secondary);
+      border-radius: 20px;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 20px;
+      max-width: 260px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+    }
+
+    .quiz-hamster-speech::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 10px 12px 10px;
+      border-style: solid;
+      border-color: transparent transparent var(--secondary) transparent;
+    }
+
+    .quiz-hamster-speech::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 8px 10px 8px;
+      border-style: solid;
+      border-color: transparent transparent var(--white) transparent;
+      z-index: 1;
+    }
+
+    /* Level Promotion Overlay Modal */
+    .promote-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(93, 64, 55, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .promote-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .promote-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      border: 8px solid var(--secondary);
+      padding: 40px;
+      width: 460px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      transform: scale(0.7);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .promote-overlay.active .promote-card {
+      transform: scale(1);
+    }
+
+    .promote-card h3 {
+      font-size: 2.2rem;
+      color: var(--primary-dark);
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 0 var(--secondary);
+    }
+
+    .promote-card p {
+      font-size: 1.2rem;
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    /* Game Screen (Hamster Feeding Challenge) */
+    #game-view {
+      background: linear-gradient(180deg, #E3F2FD 0%, #FFF5FD 100%);
+      align-items: center;
+      position: relative;
+    }
+
+    .game-navbar {
+      width: 100%;
+      height: 70px;
+      border-bottom: 2px solid rgba(141, 110, 99, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 10;
+    }
+
+    .game-hud-item {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      background: var(--white);
+      padding: 8px 20px;
+      border-radius: 30px;
+      border: 3px solid var(--secondary);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .hud-timer {
+      color: var(--accent-pink);
+    }
+
+    .hud-weight {
+      color: var(--primary-dark);
+    }
+
+    .game-arena {
+      flex: 1;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* The HTML5 Canvas for Seeds and Plate */
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      cursor: none; /* Hide default cursor so the plate acts as cursor */
+    }
+
+    /* Hamster sitting behind/under the game canvas */
+    .game-hamster-wrapper {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 150px;
+      z-index: 2; /* Sits behind the canvas, but clearly visible */
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+    }
+
+    .game-hamster-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .game-countdown-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+
+    .game-countdown-number {
+      font-size: 6rem;
+      color: var(--white);
+      font-weight: 700;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      animation: zoom-out-pulse 1s infinite;
+    }
+
+    /* Result Modal / Screen */
+    #result-view {
+      background: linear-gradient(135deg, #FFF9F3 0%, #FFEBEB 100%);
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .result-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      border: 8px solid var(--secondary);
+      box-shadow: var(--shadow-soft);
+      width: 100%;
+      max-width: 520px;
+      padding: 40px 30px;
+      text-align: center;
+      animation: bounce-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .result-card h3 {
+      font-size: 2.5rem;
+      color: var(--accent-pink);
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 0 #FFF;
+    }
+
+    .result-weight-box {
+      background: var(--primary-light);
+      border-radius: var(--border-radius-sm);
+      padding: 20px;
+      display: inline-block;
+      margin-bottom: 25px;
+      border: 3px dashed var(--primary);
+    }
+
+    .result-weight-box .number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      display: block;
+    }
+
+    .result-weight-box .label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-medium);
+    }
+
+    .result-comment {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .result-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    /* Particle Text Effect in Canvas */
+    .score-popup {
+      position: absolute;
+      color: var(--primary-dark);
+      font-family: var(--font-cute);
+      font-weight: 700;
+      font-size: 1.3rem;
+      pointer-events: none;
+      animation: float-up-fade 0.8s ease-out forwards;
+      text-shadow: 2px 2px 0 var(--white);
+      z-index: 20;
+    }
+
+    /* Animation Keyframes */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes float-alternate {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes drift {
+      0% { left: -200px; }
+      100% { left: 110%; }
+    }
+
+    @keyframes drift-window {
+      0% { left: -50px; }
+      100% { left: 130px; }
+    }
+
+    @keyframes spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes zoom-out-pulse {
+      0% { transform: scale(1.5); opacity: 0; }
+      20% { opacity: 1; }
+      80% { transform: scale(0.9); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0; }
+    }
+
+    @keyframes float-up-fade {
+      0% { transform: translateY(0) scale(0.8); opacity: 1; }
+      100% { transform: translateY(-50px) scale(1.1); opacity: 0; }
+    }
+
+    @keyframes bounce-in {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* SVG State Animations */
+    .happy-hamster-animation {
+      animation: hamster-jump 0.4s ease-out;
+    }
+
+    .sad-hamster-animation {
+      animation: hamster-shrink 0.6s infinite ease-in-out alternate;
+    }
+
+    @keyframes hamster-jump {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-25px) scale(1.05, 0.95); }
+    }
+
+    @keyframes hamster-shrink {
+      0% { transform: scale(1, 1); }
+      100% { transform: scale(1.08, 0.88) translateY(6px); }
+    }
+
+    /* Floating Heart Animation */
+    .floating-heart {
+      position: absolute;
+      color: #FF5E7E;
+      font-size: 24px;
+      animation: heart-float 1.2s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes heart-float {
+      0% { transform: translateY(50px) scale(0.5); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translateY(-100px) translateX(var(--rand-x, 10px)) scale(1.2); opacity: 0; }
+    }
+
+    /* Falling Tear Animation */
+    .falling-tear {
+      position: absolute;
+      width: 8px;
+      height: 12px;
+      background-color: var(--accent-blue);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      animation: tear-drop 0.8s ease-in forwards;
+      pointer-events: none;
+    }
+
+    @keyframes tear-drop {
+      0% { transform: translateY(20px) scale(0.5); opacity: 1; }
+      100% { transform: translateY(120px) scale(1.2); opacity: 0; }
+    }
+
+    /* Instructions Modal styling */
+    .instructions-info {
+      font-size: 0.95rem;
+      color: var(--text-medium);
+      line-height: 1.5;
+      background: var(--primary-light);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    /* Stage 2 (Spin Wheel) Screen Styles */
+    #wheel-view {
+      background: linear-gradient(135deg, #FFF9F3 0%, #FFEFE0 100%);
+    }
+
+    .wheel-instruction {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 20px;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    .wheel-progress-outer {
+      width: 80%;
+      max-width: 480px;
+      height: 28px;
+      background: var(--primary-light);
+      border: 4px solid var(--secondary);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 30px;
+    }
+
+    .wheel-progress-inner {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, #FF8E95 100%);
+      border-radius: 12px;
+      transition: width 0.1s ease;
+    }
+
+    .wheel-progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 250px;
+      height: 270px;
+      margin-bottom: 30px;
+    }
+
+    .wheel-svg-rotate {
+      position: absolute;
+      top: 0;
+      left: 15px;
+      transform-origin: 100px 100px;
+      transition: transform 0.1s linear;
+      z-index: 5;
+    }
+
+    .wheel-stand-svg {
+      position: absolute;
+      bottom: 0;
+      left: 75px;
+      z-index: 2;
+    }
+
+    .wheel-hamster-body {
+      position: absolute;
+      bottom: 75px;
+      left: 80px;
+      width: 90px;
+      height: 90px;
+      z-index: 6;
+      transform-origin: center bottom;
+    }
+
+    .wheel-hamster-body.running {
+      animation: hamster-run-bounce 0.15s infinite alternate;
+    }
+
+    @keyframes hamster-run-bounce {
+      0% { transform: translateY(0) scaleY(1); }
+      100% { transform: translateY(-5px) scaleY(0.93) scaleX(1.07); }
+    }
+
+    .btn-spin {
+      padding: 14px 44px;
+      font-size: 1.4rem;
+    }
+
+    /* Stage 3 Cat & Cabin Styles */
+    .cat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 12px;
+      background: rgba(255, 235, 235, 0.6);
+      padding: 10px 20px;
+      border-radius: var(--border-radius-sm);
+      border: 2.5px dashed var(--accent-pink);
+      position: relative;
+      transition: all 0.3s;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .cat-box.danger {
+      background: rgba(255, 205, 210, 0.95);
+      border-color: #E53935;
+      animation: pulse-border 1s infinite alternate;
+    }
+
+    @keyframes pulse-border {
+      from { box-shadow: 0 0 4px rgba(229, 57, 53, 0.4); }
+      to { box-shadow: 0 0 16px rgba(229, 57, 53, 0.8); }
+    }
+
+    .cat-status-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .cat-alert-timer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(229, 57, 53, 0.9);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      animation: zoom-out-pulse 1s infinite;
+      z-index: 10;
+    }
+
+    .cabin-box {
+      position: absolute;
+      bottom: 15px;
+      left: 10px;
+      width: 80px;
+      height: 80px;
+      z-index: 8;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    }
+
+    .hamster-svg {
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+      z-index: 9;
+    }
+
+    /* Shifted and scaled into cabin door */
+    .hamster-svg.hiding {
+      transform: translate(-70px, 30px) scale(0.35);
+      opacity: 0.55;
+    }
+
+    /* Damage Red Screen Flash */
+    @keyframes scratch-red {
+      0% { background-color: rgba(255, 0, 0, 0.4); }
+      50% { background-color: rgba(255, 0, 0, 0.65); }
+      100% { background-color: transparent; }
+    }
+
+    .scratch-flash {
+      animation: scratch-red 0.5s ease-out;
+    }
+
+    /* Ending Screen Styles */
+    #ending-view {
+      background: radial-gradient(circle at center, #2c1a04 0%, #0d0600 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      z-index: 200;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #ending-view.fade-out {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .mansion-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(255, 165, 0, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .mansion-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(90deg, rgba(255, 215, 0, 0.03) 2px, transparent 2px) 0 0 / 100px 100%,
+        linear-gradient(0deg, rgba(255, 215, 0, 0.03) 2px, transparent 2px) 0 0 / 100% 100px;
+      opacity: 0.3;
+    }
+
+    .golden-sparkles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,223,0,0.3) 1px, transparent 2px);
+      background-size: 32px 32px;
+      opacity: 0.4;
+      animation: sparkleLights 5s linear infinite;
+      z-index: 2;
+    }
+
+    @keyframes sparkleLights {
+      0% { transform: translateY(0) scale(1); opacity: 0.3; }
+      50% { transform: translateY(-10px) scale(1.1); opacity: 0.6; }
+      100% { transform: translateY(-20px) scale(1); opacity: 0.3; }
+    }
+
+    .seeds-rain-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .falling-sunflower-seed {
+      position: absolute;
+      background: linear-gradient(135deg, #4E342E 0%, #27120F 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      border: 1px solid #FFD700;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+
+    @keyframes fallSeed {
+      0% {
+        transform: translateY(-50px) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(750px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .ending-content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+    }
+
+    .ending-speech {
+      font-family: var(--font-cute);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      background: rgba(43, 24, 16, 0.9);
+      border: 4px solid #FFD700;
+      border-radius: 20px;
+      padding: 16px 20px;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+      max-width: 780px;
+      margin-top: 10px;
+      line-height: 1.7;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: slideDownFade 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      animation-delay: 0.3s;
+    }
+
+    @keyframes slideDownFade {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ending-laugh {
+      display: block;
+      color: #FFD700;
+      font-size: 1.6rem;
+      margin-top: 6px;
+      text-shadow: 0 0 10px #FF8C00, 0 0 20px #FFD700;
+      font-weight: 800;
+      opacity: 0;
+      transform: scale(0.6);
+      animation: laughPopUp 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      animation-delay: 1.8s;
+    }
+
+    @keyframes laughPopUp {
+      0% {
+        opacity: 0;
+        transform: scale(0.6) rotate(-5deg);
+      }
+      50% {
+        transform: scale(1.1) rotate(5deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .ending-scene-wrapper {
+      position: relative;
+      margin-bottom: 5px;
+      opacity: 0;
+      transform: scale(0.85);
+      animation: scenePop 1s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+      animation-delay: 0.7s;
+    }
+
+    @keyframes scenePop {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .ending-hamster-throne-svg {
+      animation: throneLaugh 0.8s ease-in-out infinite alternate;
+      animation-delay: 1.8s;
+    }
+
+    @keyframes throneLaugh {
+      0% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+      100% { transform: translateY(0) rotate(-1deg); }
+    }
+
+    .chewing-bubble {
+      position: absolute;
+      top: 80px;
+      right: 10px;
+      background: #FFF;
+      border: 3px solid #FF9F43;
+      color: #5D4037;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      animation: chewBounce 0.5s ease-in-out infinite alternate;
+      z-index: 20;
+    }
+
+    @keyframes chewBounce {
+      0% { transform: scale(0.95) rotate(-3deg); }
+      100% { transform: scale(1.1) rotate(3deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+
+    <!-- SCREEN 0: Start screen -->
+    <div id="start-view" class="screen-view active">
+      <div class="title-area">
+        <h1>黃金鼠國文大冒險</h1>
+        <p>答題養寵物 ‧ 可愛好玩學國文</p>
+      </div>
+
+      <div class="start-hamster-container">
+        <!-- SVG Hamster (Static Copy) -->
+        <svg viewBox="0 0 200 200" width="100%" height="100%">
+          <ellipse cx="100" cy="180" rx="60" ry="10" fill="rgba(0,0,0,0.1)" />
+          <circle cx="55" cy="55" r="22" fill="#E2A275" />
+          <circle cx="55" cy="55" r="14" fill="#FFC0BD" />
+          <circle cx="145" cy="55" r="22" fill="#E2A275" />
+          <circle cx="145" cy="55" r="14" fill="#FFC0BD" />
+          <path d="M100 45 C45 45 35 170 100 170 C165 170 155 45 100 45 Z" fill="url(#startGradient)" />
+          <ellipse cx="100" cy="130" rx="45" ry="35" fill="#FFFFFF" />
+          <circle cx="72" cy="95" r="8" fill="#2E2E2E" />
+          <circle cx="70" cy="92" r="3" fill="#FFFFFF" />
+          <circle cx="128" cy="95" r="8" fill="#2E2E2E" />
+          <circle cx="126" cy="92" r="3" fill="#FFFFFF" />
+          <ellipse cx="58" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+          <ellipse cx="142" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+          <polygon points="100,104 96,98 104,98" fill="#FF8E95" />
+          <path d="M94 108 Q100 114 100 108 Q100 114 106 108" stroke="#2E2E2E" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <ellipse cx="80" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+          <ellipse cx="120" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+          <ellipse cx="65" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+          <ellipse cx="135" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+          <defs>
+            <linearGradient id="startGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFD6A5" />
+              <stop offset="70%" stop-color="#FF9E79" />
+              <stop offset="100%" stop-color="#E28156" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <button id="start-game-btn" class="btn btn-primary" onclick="initAudioAndStartIntro()">進入夢幻房間</button>
+    </div>
+
+    <!-- SCREEN 6: Intro Animation Screen -->
+    <div id="intro-view" class="screen-view">
+      <div class="intro-container">
+        <div class="intro-title">與黃金鼠的相遇 ✨</div>
+        <div class="intro-hamster-wrapper">
+          <svg viewBox="0 0 200 200" width="100%" height="100%">
+            <ellipse cx="100" cy="180" rx="60" ry="10" fill="rgba(0,0,0,0.1)" />
+            <circle cx="55" cy="55" r="22" fill="#E2A275" />
+            <circle cx="55" cy="55" r="14" fill="#FFC0BD" />
+            <circle cx="145" cy="55" r="22" fill="#E2A275" />
+            <circle cx="145" cy="55" r="14" fill="#FFC0BD" />
+            <path d="M100 45 C45 45 35 170 100 170 C165 170 155 45 100 45 Z" fill="url(#introGradient)" />
+            <ellipse cx="100" cy="130" rx="45" ry="35" fill="#FFFFFF" />
+            <circle cx="72" cy="95" r="8" fill="#2E2E2E" />
+            <circle cx="70" cy="92" r="3" fill="#FFFFFF" />
+            <circle cx="128" cy="95" r="8" fill="#2E2E2E" />
+            <circle cx="126" cy="92" r="3" fill="#FFFFFF" />
+            <ellipse cx="58" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+            <ellipse cx="142" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+            <polygon points="100,104 96,98 104,98" fill="#FF8E95" />
+            <!-- Talking happy mouth -->
+            <ellipse cx="100" cy="112" rx="6" ry="4" fill="#FF8E95" stroke="#2E2E2E" stroke-width="1.5" />
+            <ellipse cx="80" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+            <ellipse cx="120" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+            <ellipse cx="65" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+            <ellipse cx="135" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+            <defs>
+              <linearGradient id="introGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FFD6A5" />
+                <stop offset="70%" stop-color="#FF9E79" />
+                <stop offset="100%" stop-color="#E28156" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="intro-speech-bubble" id="intro-speech-text"></div>
+        <div class="intro-progress-container">
+          <div class="intro-progress-bar" id="intro-progress-bar"></div>
+        </div>
+        <button class="intro-skip-btn" onclick="skipIntro()">跳過劇情 ➔</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: Map Screen (Hamster Room) -->
+    <div id="map-view" class="screen-view">
+      <div class="room-background">
+        <!-- Floating Clouds -->
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        
+        <!-- Room Window decoration -->
+        <div class="room-window">
+          <div class="window-hill"></div>
+          <div class="window-cloud"></div>
+        </div>
+
+        <!-- Hamster Wheel decoration -->
+        <div class="hamster-wheel">
+          <svg class="hamster-wheel-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" stroke="#D7CCC8" stroke-width="4" fill="none" stroke-dasharray="8 4" />
+            <circle cx="50" cy="50" r="3" fill="#8D6E63" />
+            <line x1="50" y1="50" x2="50" y2="8" stroke="#BCAAA4" stroke-width="2" />
+            <line x1="50" y1="50" x2="50" y2="92" stroke="#BCAAA4" stroke-width="2" />
+            <line x1="50" y1="50" x2="8" y2="50" stroke="#BCAAA4" stroke-width="2" />
+            <line x1="50" y1="50" x2="92" y2="50" stroke="#BCAAA4" stroke-width="2" />
+            <path d="M50 50 L35 90 M50 50 L65 90" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <!-- Wooden Floor -->
+        <div class="room-floor"></div>
+      </div>
+
+      <div class="map-header">
+        <h2>黃金鼠的夢幻房間</h2>
+        <p>請選擇一個關卡進行挑戰，幫助黃金鼠收集葵瓜子！</p>
+      </div>
+
+      <!-- Stage Buttons Cards -->
+      <div class="stages-layout">
+        <!-- Stage 1 Card -->
+        <div class="stage-card" onclick="enterStage(1)">
+          <span class="stage-badge">第一關</span>
+          <div class="stage-title">絕句大挑戰</div>
+          <div class="stage-desc">完成後可玩：接葵瓜子 🌻</div>
+          <div class="stage-status" id="status-stage-1">
+            <span>⭐ 未挑戰</span>
+          </div>
+        </div>
+
+        <!-- Stage 2 Card -->
+        <div class="stage-card" onclick="enterStage(2)">
+          <span class="stage-badge" style="background:#FFE6D0; color:#E66A00;">第二關</span>
+          <div class="stage-title">借代大挑戰</div>
+          <div class="stage-desc">完成後可玩：跑滾輪 🎡</div>
+          <div class="stage-status" id="status-stage-2">
+            <span>⭐ 未挑戰</span>
+          </div>
+        </div>
+
+        <!-- Stage 3 Card -->
+        <div class="stage-card" onclick="enterStage(3)">
+          <span class="stage-badge" style="background:#FFE0E2; color:#D32F2F;">第三關</span>
+          <div class="stage-title">象徵大挑戰</div>
+          <div class="stage-desc">關卡威脅：躲避貓咪 🐱</div>
+          <div class="stage-status" id="status-stage-3">
+            <span>⭐ 未挑戰</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dialogue & Hamster on Floor -->
+      <div class="map-dialogue" id="map-hamster-dialogue">肚子好餓喔！主人快幫我答題賺葵瓜子！</div>
+      <div class="map-hamster" onclick="triggerMapHamsterDialogue()">
+        <!-- Mini Static SVG Hamster -->
+        <svg viewBox="0 0 200 200" width="100%" height="100%">
+          <ellipse cx="100" cy="180" rx="60" ry="10" fill="rgba(0,0,0,0.1)" />
+          <circle cx="55" cy="55" r="22" fill="#E2A275" />
+          <circle cx="55" cy="55" r="14" fill="#FFC0BD" />
+          <circle cx="145" cy="55" r="22" fill="#E2A275" />
+          <circle cx="145" cy="55" r="14" fill="#FFC0BD" />
+          <path d="M100 45 C45 45 35 170 100 170 C165 170 155 45 100 45 Z" fill="url(#mapGrad)" />
+          <ellipse cx="100" cy="130" rx="45" ry="35" fill="#FFFFFF" />
+          <circle cx="72" cy="95" r="8" fill="#2E2E2E" />
+          <circle cx="128" cy="95" r="8" fill="#2E2E2E" />
+          <ellipse cx="58" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+          <ellipse cx="142" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+          <polygon points="100,104 96,98 104,98" fill="#FF8E95" />
+          <path d="M94 108 Q100 114 100 108 Q100 114 106 108" stroke="#2E2E2E" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <ellipse cx="80" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+          <ellipse cx="120" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+          <ellipse cx="65" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+          <ellipse cx="135" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+          <defs>
+            <linearGradient id="mapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFD6A5" />
+              <stop offset="100%" stop-color="#FF9E79" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Quiz Screen -->
+    <div id="quiz-view" class="screen-view">
+      <div class="quiz-navbar">
+        <button class="back-btn" onclick="backToMap()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          返回房間
+        </button>
+        <div class="quiz-title-display" id="stage-title-banner">第一關：絕句大挑戰</div>
+        <div class="game-hud-item hud-weight" id="quiz-weight-counter" style="font-size: 1rem; padding: 4px 14px;">黃金鼠：80g</div>
+        <div class="quiz-progress-top" id="score-counter">進度：0 / 5</div>
+      </div>
+
+      <div class="quiz-workspace">
+        <!-- Left Column: Question and Options -->
+        <div class="question-panel">
+          <div class="question-card">
+            <div class="question-number" id="question-index-label">Question 1</div>
+            <div class="question-text" id="question-text-content">讀取題目中...</div>
+          </div>
+
+          <div class="options-list">
+            <button class="option-btn" onclick="selectOption(0)">
+              <span class="option-letter">A</span>
+              <span class="option-txt" id="opt-0">選項 A</span>
+            </button>
+            <button class="option-btn" onclick="selectOption(1)">
+              <span class="option-letter">B</span>
+              <span class="option-txt" id="opt-1">選項 B</span>
+            </button>
+            <button class="option-btn" onclick="selectOption(2)">
+              <span class="option-letter">C</span>
+              <span class="option-txt" id="opt-2">選項 C</span>
+            </button>
+            <button class="option-btn" onclick="selectOption(3)">
+              <span class="option-letter">D</span>
+              <span class="option-txt" id="opt-3">選項 D</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Hamster & Cat box -->
+        <div class="hamster-panel">
+          <!-- Particles Container -->
+          <div class="hearts-container" id="hearts-layer"></div>
+          <div class="tears-container" id="tears-layer"></div>
+
+          <!-- Cat element (Stage 3 only) -->
+          <div class="cat-box" id="cat-element" style="display: none;">
+            <div class="cat-status-text" id="cat-status-label">貓咪正在睡覺... 安心答題！</div>
+            <div class="cat-svg-container" style="position: relative;">
+              <svg viewBox="0 0 120 100" width="120" height="100">
+                <path d="M20 80 Q60 50 100 80" stroke="#78909C" stroke-width="8" stroke-linecap="round" fill="none"/>
+                <circle cx="60" cy="50" r="30" fill="#90A4AE" />
+                <polygon points="35,30 30,10 50,25" fill="#90A4AE" />
+                <polygon points="38,28 34,14 46,24" fill="#FFCDD2" />
+                <polygon points="85,30 90,10 70,25" fill="#90A4AE" />
+                <polygon points="82,28 86,14 74,24" fill="#FFCDD2" />
+                <g id="cat-eyes-sleeping">
+                  <path d="M42 50 Q48 55 54 50" stroke="#37474F" stroke-width="3" fill="none" stroke-linecap="round" />
+                  <path d="M66 50 Q72 55 78 50" stroke="#37474F" stroke-width="3" fill="none" stroke-linecap="round" />
+                </g>
+                <g id="cat-eyes-alert" style="display: none;">
+                  <circle cx="48" cy="48" r="7" fill="#FFD54F" />
+                  <ellipse cx="48" cy="48" rx="2" ry="6" fill="#000000" />
+                  <circle cx="72" cy="48" r="7" fill="#FFD54F" />
+                  <ellipse cx="72" cy="48" rx="2" ry="6" fill="#000000" />
+                </g>
+                <polygon points="60,56 57,53 63,53" fill="#FF8E95" />
+                <path d="M56 59 Q60 62 60 59 Q60 62 64 59" stroke="#37474F" stroke-width="1.5" fill="none" />
+                <line x1="25" y1="52" x2="10" y2="50" stroke="#B0BEC5" stroke-width="2" />
+                <line x1="25" y1="56" x2="8" y2="58" stroke="#B0BEC5" stroke-width="2" />
+                <line x1="95" y1="52" x2="110" y2="50" stroke="#B0BEC5" stroke-width="2" />
+                <line x1="95" y1="56" x2="112" y2="58" stroke="#B0BEC5" stroke-width="2" />
+              </svg>
+              <div class="cat-alert-timer" id="cat-timer-text" style="display: none;">3</div>
+            </div>
+          </div>
+
+          <div class="interactive-hamster-container">
+            <!-- Cabin SVG (Stage 3 only) -->
+            <div class="cabin-box" id="cabin-element" style="display: none;">
+              <svg viewBox="0 0 100 100" width="100%" height="100%">
+                <path d="M15 90 L15 50 L50 20 L85 50 L85 90 Z" fill="#D7CCC8" stroke="#8D6E63" stroke-width="4" stroke-linejoin="round"/>
+                <polygon points="5 50 50 15 95 50" fill="#A1887F" stroke="#8D6E63" stroke-width="4" />
+                <path d="M35 90 A15 15 0 0 1 65 90 Z" fill="#5D4037" />
+              </svg>
+            </div>
+
+            <!-- Full Interactive SVG Hamster -->
+            <svg class="hamster-svg" viewBox="0 0 200 200" width="100%" height="100%" onclick="onHamsterClicked()" style="cursor: pointer;">
+              <ellipse cx="100" cy="180" rx="60" ry="10" fill="rgba(0,0,0,0.1)" />
+              
+              <g class="ears">
+                <circle cx="55" cy="55" r="22" fill="#E2A275" />
+                <circle cx="55" cy="55" r="14" fill="#FFC0BD" />
+                <circle cx="145" cy="55" r="22" fill="#E2A275" />
+                <circle cx="145" cy="55" r="14" fill="#FFC0BD" />
+              </g>
+              
+              <path class="hamster-body" d="M100 45 C45 45 35 170 100 170 C165 170 155 45 100 45 Z" fill="url(#quizHamsterGrad)" />
+              <ellipse cx="100" cy="130" rx="45" ry="35" fill="#FFFFFF" />
+
+              <g class="eyes">
+                <g class="eye-idle">
+                  <circle cx="72" cy="95" r="8" fill="#2E2E2E" />
+                  <circle cx="70" cy="92" r="3" fill="#FFFFFF" />
+                  <circle cx="128" cy="95" r="8" fill="#2E2E2E" />
+                  <circle cx="126" cy="92" r="3" fill="#FFFFFF" />
+                </g>
+                <g class="eye-happy" style="display: none;">
+                  <path d="M62 98 Q72 86 82 98" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+                  <path d="M118 98 Q128 86 138 98" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+                </g>
+                <g class="eye-sad" style="display: none;">
+                  <path d="M62 94 Q72 104 82 94" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+                  <path d="M118 94 Q128 104 138 94" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+                </g>
+              </g>
+
+              <ellipse class="cheek-left" cx="58" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+              <ellipse class="cheek-right" cx="142" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+
+              <polygon points="100,104 96,98 104,98" fill="#FF8E95" />
+
+              <g class="mouth">
+                <path class="mouth-idle" d="M94 108 Q100 114 100 108 Q100 114 106 108" stroke="#2E2E2E" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                <path class="mouth-happy" d="M94 108 Q100 122 106 108 Z" fill="#FF8E95" stroke="#2E2E2E" stroke-width="2" style="display: none;" />
+                <path class="mouth-sad" d="M94 114 Q100 105 106 114" stroke="#2E2E2E" stroke-width="2.5" stroke-linecap="round" fill="none" style="display: none;" />
+              </g>
+
+              <g class="paws">
+                <g class="paw-idle">
+                  <ellipse cx="80" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+                  <ellipse cx="120" cy="135" rx="8" ry="6" fill="#FAD1C0" />
+                </g>
+                <g class="paw-happy" style="display: none;">
+                  <ellipse cx="82" cy="130" rx="8" ry="6" fill="#FAD1C0" />
+                  <ellipse cx="118" cy="130" rx="8" ry="6" fill="#FAD1C0" />
+                  <path d="M100 116 C92 126 100 136 100 136 C100 136 108 126 100 116 Z" fill="#795548" />
+                  <path d="M100 116 L100 136" stroke="#3E2723" stroke-width="1.2" />
+                </g>
+                <g class="paw-sad" style="display: none;">
+                  <ellipse cx="72" cy="105" rx="8" ry="8" fill="#FAD1C0" />
+                  <ellipse cx="128" cy="105" rx="8" ry="8" fill="#FAD1C0" />
+                </g>
+              </g>
+
+              <g class="feet">
+                <ellipse cx="65" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+                <ellipse cx="135" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+              </g>
+
+              <defs>
+                <linearGradient id="quizHamsterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFD6A5" />
+                  <stop offset="70%" stop-color="#FF9E79" />
+                  <stop offset="100%" stop-color="#E28156" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="quiz-hamster-speech" id="hamster-speech-bubble">答對題目，我就能吃到好吃的葵瓜子喔！</div>
+          <!-- Clickable button helper to hide hamster for Stage 3 -->
+          <button class="btn btn-secondary" id="hide-btn" style="display: none; margin-top: 15px; padding: 8px 20px; font-size: 1rem;" onclick="goIntoHiding()">躲進小屋！</button>
+        </div>
+      </div>
+
+      <!-- Promotion / Victory Modal Overlay -->
+      <div class="promote-overlay" id="quiz-promote-overlay">
+        <div class="promote-card">
+          <h3 id="promote-title">🎉 成功晉級 🎉</h3>
+          <p id="promote-desc">太厲害了！你已經成功答對 5 題，開啟黃金鼠的餵食遊戲！準備好接住滿滿的葵瓜子了嗎？</p>
+          <button class="btn btn-primary" id="promote-btn" onclick="onPromoteButtonClicked()">開啟餵食遊戲！</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Feeding Game Screen -->
+    <div id="game-view" class="screen-view">
+      <div class="game-navbar">
+        <div class="game-hud-item hud-timer">時間：<span id="timer-val">20</span> 秒</div>
+        <div class="game-hud-item hud-title">第一關：接葵瓜子 🌻</div>
+        <div class="game-hud-item hud-weight">黃金鼠：<span id="weight-val">80</span> 克</div>
+      </div>
+
+      <div class="game-arena">
+        <!-- Floating score popups will appear here -->
+        
+        <!-- Interactive SVGHamster in Background of Canvas -->
+        <div class="game-hamster-wrapper" id="arena-hamster-container">
+          <svg class="game-hamster-svg" viewBox="0 0 200 200">
+            <ellipse cx="100" cy="180" rx="60" ry="10" fill="rgba(0,0,0,0.1)" />
+            <circle cx="55" cy="55" r="22" fill="#E2A275" />
+            <circle cx="55" cy="55" r="14" fill="#FFC0BD" />
+            <circle cx="145" cy="55" r="22" fill="#E2A275" />
+            <circle cx="145" cy="55" r="14" fill="#FFC0BD" />
+            <path d="M100 45 C45 45 35 170 100 170 C165 170 155 45 100 45 Z" fill="url(#gameHamGrad)" />
+            <ellipse cx="100" cy="130" rx="45" ry="35" fill="#FFFFFF" />
+            <g id="game-hamster-eyes">
+              <!-- Happy eyes during feeding game by default -->
+              <path d="M62 98 Q72 86 82 98" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+              <path d="M118 98 Q128 86 138 98" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+            </g>
+            <ellipse cx="58" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+            <ellipse cx="142" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+            <polygon points="100,104 96,98 104,98" fill="#FF8E95" />
+            <g id="game-hamster-mouth">
+              <!-- Chewing mouth open -->
+              <ellipse cx="100" cy="112" rx="6" ry="4" fill="#FF8E95" stroke="#2E2E2E" stroke-width="1.5" />
+            </g>
+            <g class="paws">
+              <ellipse cx="80" cy="132" rx="8" ry="6" fill="#FAD1C0" />
+              <ellipse cx="120" cy="132" rx="8" ry="6" fill="#FAD1C0" />
+            </g>
+            <g class="feet">
+              <ellipse cx="65" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+              <ellipse cx="135" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+            </g>
+            <defs>
+              <linearGradient id="gameHamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FFD6A5" />
+                <stop offset="70%" stop-color="#FF9E79" />
+                <stop offset="100%" stop-color="#E28156" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- The Canvas overlay -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Pre-game countdown -->
+        <div class="game-countdown-overlay" id="game-countdown-screen">
+          <div class="game-countdown-number" id="countdown-text">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: Spin Wheel Game Screen -->
+    <div id="wheel-view" class="screen-view">
+      <div class="game-navbar">
+        <div class="game-hud-item hud-timer">時間：<span id="wheel-timer-val">20</span> 秒</div>
+        <div class="game-hud-item hud-title">第二關：跑滾輪大冒險 🎡</div>
+        <div class="game-hud-item hud-weight">速度：<span id="wheel-speed-val">0</span> km/h</div>
+      </div>
+
+      <div class="game-arena" style="flex-direction: column; justify-content: center; align-items: center;">
+        <div class="wheel-instruction">滑鼠快速「連點按鈕」或按【空白鍵】狂轉滾輪！</div>
+        
+        <!-- Progress Bar -->
+        <div class="wheel-progress-outer">
+          <div class="wheel-progress-inner" id="wheel-progress-bar"></div>
+          <div class="wheel-progress-text" id="wheel-progress-text">0%</div>
+        </div>
+
+        <!-- Interactive Wheel and Hamster -->
+        <div class="wheel-container" id="interactive-wheel-container">
+          <!-- The rotating Wheel SVG -->
+          <svg class="wheel-svg-rotate" id="wheel-svg-rotate" viewBox="0 0 200 200" width="220" height="220">
+            <circle cx="100" cy="100" r="90" stroke="#FF9F43" stroke-width="8" fill="none" stroke-dasharray="15 8" />
+            <circle cx="100" cy="100" r="6" fill="#8D6E63" />
+            <line x1="100" y1="100" x2="100" y2="10" stroke="#D7CCC8" stroke-width="4" />
+            <line x1="100" y1="100" x2="100" y2="190" stroke="#D7CCC8" stroke-width="4" />
+            <line x1="100" y1="100" x2="10" y2="100" stroke="#D7CCC8" stroke-width="4" />
+            <line x1="100" y1="100" x2="190" y2="100" stroke="#D7CCC8" stroke-width="4" />
+            <line x1="100" y1="100" x2="36" y2="36" stroke="#D7CCC8" stroke-width="3" />
+            <line x1="100" y1="100" x2="164" y2="164" stroke="#D7CCC8" stroke-width="3" />
+            <line x1="100" y1="100" x2="36" y2="164" stroke="#D7CCC8" stroke-width="3" />
+            <line x1="100" y1="100" x2="164" y2="36" stroke="#D7CCC8" stroke-width="3" />
+          </svg>
+          
+          <!-- The Stand (Non-rotating) -->
+          <svg class="wheel-stand-svg" viewBox="0 0 100 100" width="100" height="100">
+            <path d="M50 50 L35 90 M50 50 L65 90 M25 90 L75 90" stroke="#8D6E63" stroke-width="6" stroke-linecap="round" fill="none" />
+          </svg>
+
+          <!-- Hamster running inside -->
+          <div class="wheel-hamster-body" id="wheel-hamster">
+            <svg viewBox="0 0 200 200" width="100%" height="100%">
+              <circle cx="55" cy="55" r="22" fill="#E2A275" />
+              <circle cx="55" cy="55" r="14" fill="#FFC0BD" />
+              <circle cx="145" cy="55" r="22" fill="#E2A275" />
+              <circle cx="145" cy="55" r="14" fill="#FFC0BD" />
+              <path d="M100 45 C45 45 35 170 100 170 C165 170 155 45 100 45 Z" fill="url(#wheelHamGrad)" />
+              <ellipse cx="100" cy="130" rx="45" ry="35" fill="#FFFFFF" />
+              <path d="M62 98 Q72 86 82 98" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+              <path d="M118 98 Q128 86 138 98" stroke="#2E2E2E" stroke-width="4.5" stroke-linecap="round" fill="none" />
+              <ellipse cx="58" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+              <ellipse cx="142" cy="110" rx="10" ry="7" fill="#FFA5A5" />
+              <polygon points="100,104 96,98 104,98" fill="#FF8E95" />
+              <ellipse cx="100" cy="112" rx="6" ry="4" fill="#FF8E95" stroke="#2E2E2E" stroke-width="1.5" />
+              <g id="wheel-hamster-paws">
+                <ellipse cx="75" cy="125" rx="8" ry="6" fill="#FAD1C0" />
+                <ellipse cx="125" cy="125" rx="8" ry="6" fill="#FAD1C0" />
+              </g>
+              <g id="wheel-hamster-feet">
+                <ellipse cx="65" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+                <ellipse cx="135" cy="175" rx="12" ry="6" fill="#FAD1C0" />
+              </g>
+              <defs>
+                <linearGradient id="wheelHamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFD6A5" />
+                  <stop offset="70%" stop-color="#FF9E79" />
+                  <stop offset="100%" stop-color="#E28156" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-spin" id="spin-click-area" onclick="triggerSpin()">衝啊！跑跑跑！</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: Game Result Screen -->
+    <div id="result-view" class="screen-view">
+      <div class="result-card">
+        <h3>🎉 培育挑戰成果 🎉</h3>
+        
+        <div class="result-weight-box">
+          <span class="number" id="final-weight-display">150g</span>
+          <span class="label">黃金鼠最終體重</span>
+        </div>
+
+        <div class="result-comment" id="final-comment-display">
+          哇！黃金鼠被你餵得圓滾滾的，像顆麻糬一樣可愛！
+        </div>
+
+        <div class="instructions-info" id="game-stats-breakdown">
+          遊戲統計數據載入中...
+        </div>
+
+        <div class="result-actions" style="margin-top: 30px;">
+          <button class="btn btn-secondary" id="result-restart-btn" onclick="restartLastGame()">再玩一次</button>
+          <button class="btn btn-primary" onclick="backToMap()">回夢幻房間</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 7: Ending Animation Screen -->
+    <div id="ending-view" class="screen-view">
+      <!-- Luxurious background elements -->
+      <div class="mansion-bg">
+        <!-- Golden rays or sparkle effects -->
+        <div class="golden-sparkles" id="golden-sparkles-container"></div>
+      </div>
+      
+      <!-- Falling sunflower seeds container -->
+      <div class="seeds-rain-container" id="seeds-rain-layer"></div>
+      
+      <!-- Content overlay -->
+      <div class="ending-content">
+        <!-- The glowing text -->
+        <div class="ending-speech" id="ending-speech-text">
+          主人！你成功引起我的注意了！<br>
+          既然你的國文造詣如此高明，我也就勉為其難接受你的供養吧！<br>
+          接下來的日子，就讓我們一起征服國文世界吧！<br>
+          <span class="ending-laugh" id="ending-laugh-text">哈哈哈！哈哈哈！</span>
+        </div>
+        
+        <!-- Central Hamster SVG Throne Scene -->
+        <div class="ending-scene-wrapper">
+          <svg class="ending-hamster-throne-svg" viewBox="0 0 400 400" width="320" height="320">
+            <!-- Squished Cat underneath -->
+            <g id="squished-cat" transform="translate(200, 340)">
+              <!-- Squished cat body flat ellipse -->
+              <ellipse cx="0" cy="0" rx="90" ry="16" fill="#78909C" />
+              <!-- Squished cat ears sticking out flat -->
+              <path d="M-80 0 L-95 -10 L-70 -5 Z" fill="#90A4AE" />
+              <path d="M80 0 L95 -10 L70 -5 Z" fill="#90A4AE" />
+              <!-- Squished tail -->
+              <path d="M-90 0 Q-110 -15 -120 -5 Q-110 5 -90 0" fill="#78909C" />
+              <!-- Cat face details (squished) -->
+              <!-- Dead/squished eyes X X -->
+              <line x1="-30" y1="-5" x2="-20" y2="5" stroke="#37474F" stroke-width="3" stroke-linecap="round" />
+              <line x1="-20" y1="-5" x2="-30" y2="5" stroke="#37474F" stroke-width="3" stroke-linecap="round" />
+              <line x1="20" y1="-5" x2="30" y2="5" stroke="#37474F" stroke-width="3" stroke-linecap="round" />
+              <line x1="30" y1="-5" x2="20" y2="5" stroke="#37474F" stroke-width="3" stroke-linecap="round" />
+              <!-- Squished mouth and tongue -->
+              <path d="M-5 5 Q0 12 5 5 Z" fill="#FF8E95" />
+              <!-- Whisker lines -->
+              <line x1="-45" y1="2" x2="-65" y2="0" stroke="#B0BEC5" stroke-width="2" />
+              <line x1="-45" y1="6" x2="-63" y2="8" stroke="#B0BEC5" stroke-width="2" />
+              <line x1="45" y1="2" x2="65" y2="0" stroke="#B0BEC5" stroke-width="2" />
+              <line x1="45" y1="6" x2="63" y2="8" stroke="#B0BEC5" stroke-width="2" />
+            </g>
+            
+            <!-- Golden Throne -->
+            <g id="golden-throne">
+              <!-- Throne Backrest -->
+              <path d="M120 320 L120 120 C120 70 280 70 280 120 L280 320 Z" fill="#FFD700" stroke="#DAA520" stroke-width="6" />
+              <!-- Inner Velvet Backrest Cushion -->
+              <path d="M140 310 L140 130 C140 100 260 100 260 130 L260 310 Z" fill="#D32F2F" />
+              <!-- Golden ornaments on backrest top -->
+              <circle cx="200" cy="70" r="15" fill="#FFD700" stroke="#B8860B" stroke-width="3" />
+              <polygon points="190,70 200,50 210,70" fill="#FFD700" />
+              <!-- Throne Armrests -->
+              <!-- Left Armrest -->
+              <rect x="90" y="240" width="40" height="80" rx="10" fill="#FFD700" stroke="#DAA520" stroke-width="4" />
+              <rect x="90" y="230" width="45" height="15" rx="5" fill="#B8860B" />
+              <!-- Right Armrest -->
+              <rect x="270" y="240" width="40" height="80" rx="10" fill="#FFD700" stroke="#DAA520" stroke-width="4" />
+              <rect x="265" y="230" width="45" height="15" rx="5" fill="#B8860B" />
+              <!-- Throne Base/Seat Cushion -->
+              <rect x="110" y="290" width="180" height="40" rx="10" fill="#FFD700" stroke="#DAA520" stroke-width="4" />
+              <rect x="120" y="280" width="160" height="20" rx="5" fill="#D32F2F" />
+              <!-- Throne Legs -->
+              <rect x="120" y="325" width="20" height="20" fill="#B8860B" />
+              <rect x="260" y="325" width="20" height="20" fill="#B8860B" />
+            </g>
+            
+            <!-- Domineering President Hamster sitting on throne -->
+            <g id="president-hamster" transform="translate(200, 230)">
+              <!-- Hamster body -->
+              <!-- Left Ear -->
+              <circle cx="-45" cy="-60" r="22" fill="#E2A275" />
+              <circle cx="-45" cy="-60" r="14" fill="#FFC0BD" />
+              <!-- Right Ear -->
+              <circle cx="45" cy="-60" r="22" fill="#E2A275" />
+              <circle cx="45" cy="-60" r="14" fill="#FFC0BD" />
+              <!-- Main Body shape -->
+              <path d="M0 -70 C-55 -70 -65 50 0 50 C65 50 55 -70 0 -70 Z" fill="url(#presHamGrad)" />
+              <!-- White belly showing above suit slightly -->
+              <ellipse cx="0" cy="10" rx="35" ry="25" fill="#FFFFFF" />
+              
+              <!-- Domineering Slicked-back Hair (梳油頭) -->
+              <path d="M-30 -62 Q-10 -75 0 -75 Q10 -75 30 -62 Q0 -88 -30 -62" fill="#3E2723" />
+              <path d="M-20 -60 Q0 -70 20 -60 L15 -52 Q0 -58 -15 -52 Z" fill="#27120F" />
+              
+              <!-- Suit and Tie (西裝領帶) -->
+              <!-- Black suit coat -->
+              <path d="M-50 10 L-25 50 L25 50 L50 10 L35 0 L20 20 L0 5 L-20 20 L-35 0 Z" fill="#212121" />
+              <!-- White shirt collar v-neck -->
+              <polygon points="-20,20 0,5 20,20 0,35" fill="#FFFFFF" />
+              <!-- Red tie -->
+              <polygon points="-4,22 4,22 6,42 0,48 -6,42" fill="#D32F2F" />
+              <!-- Gold suit pin -->
+              <circle cx="-25" cy="25" r="3" fill="#FFD700" />
+              
+              <!-- Eyes: Smug boss smile (raised eyebrow, half-closed smirk eyes) -->
+              <!-- Left Eye (wink/half-closed) -->
+              <path d="M-30 -22 Q-20 -28 -10 -22" stroke="#2E2E2E" stroke-width="4" stroke-linecap="round" fill="none" />
+              <path d="M-32 -30 Q-22 -35 -12 -32" stroke="#2E2E2E" stroke-width="2.5" stroke-linecap="round" fill="none" />
+              <!-- Right Eye (smug raised eyebrow) -->
+              <path d="M10 -22 Q20 -28 30 -22" stroke="#2E2E2E" stroke-width="4" stroke-linecap="round" fill="none" />
+              <path d="M8 -34 Q20 -38 32 -30" stroke="#2E2E2E" stroke-width="2.5" stroke-linecap="round" fill="none" />
+              
+              <!-- Cheeks -->
+              <ellipse cx="-38" cy="-8" rx="10" ry="7" fill="#FFA5A5" />
+              <ellipse cx="38" cy="-8" rx="10" ry="7" fill="#FFA5A5" />
+              
+              <!-- Nose -->
+              <polygon points="0,-14 -4,-20 4,-20" fill="#FF8E95" />
+              
+              <!-- Smirk Mouth -->
+              <path d="M-8 -8 Q0 0 8 -8" stroke="#2E2E2E" stroke-width="3" stroke-linecap="round" fill="none" />
+              <path d="M6 -10 C10 -12 12 -8 8 -8" stroke="#2E2E2E" stroke-width="2" fill="none" />
+              
+              <!-- Hands & Feet -->
+              <!-- Left Leg: Crossed leg (翹腳) -->
+              <g id="crossed-leg" transform="translate(-25, 45) rotate(15)">
+                <ellipse cx="0" cy="0" rx="18" ry="10" fill="#FFD6A5" stroke="#E28156" stroke-width="2" />
+                <ellipse cx="12" cy="0" rx="8" ry="6" fill="#FAD1C0" />
+              </g>
+              <!-- Right Leg: Normal leg -->
+              <g id="normal-leg" transform="translate(25, 45)">
+                <ellipse cx="0" cy="0" rx="12" ry="12" fill="#FFD6A5" stroke="#E28156" stroke-width="2" />
+                <ellipse cx="0" cy="8" rx="10" ry="6" fill="#FAD1C0" />
+              </g>
+              
+              <!-- Left Arm holding the Goblet -->
+              <g id="arm-goblet" transform="translate(-35, 15)">
+                <path d="M0 0 Q-20 10 -25 3" stroke="#FFD6A5" stroke-width="14" stroke-linecap="round" fill="none" />
+                <g transform="translate(-28, -5)">
+                  <path d="M-8 22 L8 22 M0 22 L0 10" stroke="#CFD8DC" stroke-width="2.5" stroke-linecap="round" />
+                  <path d="M-10 10 C-10 15 10 15 10 10 L8 0 L-8 0 Z" fill="rgba(207, 216, 220, 0.4)" stroke="#CFD8DC" stroke-width="1.5" />
+                  <ellipse cx="0" cy="4" rx="6" ry="3" fill="#D7CCC8" />
+                  <circle cx="-3" cy="2" r="2" fill="#4E342E" />
+                  <circle cx="2" cy="3" r="2" fill="#4E342E" />
+                  <circle cx="1" cy="6" r="2" fill="#3E2723" />
+                </g>
+                <ellipse cx="-26" cy="2" rx="6" ry="6" fill="#FAD1C0" />
+              </g>
+              
+              <!-- Right Arm resting on armrest -->
+              <g id="arm-right" transform="translate(35, 15)">
+                <path d="M0 0 Q20 5 25 12" stroke="#FFD6A5" stroke-width="14" stroke-linecap="round" fill="none" />
+                <ellipse cx="25" cy="12" rx="6" ry="6" fill="#FAD1C0" />
+              </g>
+              
+              <defs>
+                <linearGradient id="presHamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFD6A5" />
+                  <stop offset="70%" stop-color="#FF9E79" />
+                  <stop offset="100%" stop-color="#E28156" />
+                </linearGradient>
+              </defs>
+            </g>
+          </svg>
+          
+          <!-- Chewing text -->
+          <div class="chewing-bubble">嚼嚼...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- STAGE QUESTIONS DATA ---
+    const STAGES = {
+      1: {
+        title: "第一關：絕句大挑戰",
+        description: "絕句格律與詞性修辭挑戰",
+        questions: [
+          {
+            q: "「唯見長江天際流」，句中「唯」字的詞性與下列何者相同？",
+            options: ["「欲」窮千里目", "欲窮千里「目」", "落日故人「情」", "清泉石「上」流"],
+            ans: 0 // A (欲: 副詞)
+          },
+          {
+            q: "「欲窮千里目，更上一層樓」的寓意，與下列哪一項相近？",
+            options: ["退一步，海闊天空", "千里之行始於足下", "百尺竿頭，更進一步", "寸有所長，尺有所短"],
+            ans: 2 // C
+          },
+          {
+            q: "下列運用感官摹寫成的詞語，哪一組相同？",
+            options: ["柳暗花明／風吹草動", "枝繁葉茂／花紅柳綠", "鳥語花香／鶯聲燕語", "風和日麗／和風送暖"],
+            ans: 1 // B (都是視覺)
+          },
+          {
+            q: "「唯見長江天際流」一句的主語是：",
+            options: ["遠行人", "送行之人", "孤帆", "碧山"],
+            ans: 1 // B (送行之人-作者李白)
+          },
+          {
+            q: "「相看兩不厭，只有敬亭山」是運用了修辭學上的：",
+            options: ["借代法", "映襯法", "誇飾法", "擬人法"],
+            ans: 3 // D
+          }
+        ]
+      },
+      2: {
+        title: "第二關：借代大挑戰",
+        description: "文言文常見借代詞彙考驗",
+        questions: [
+          {
+            q: "國文中常用「桑麻」來借代指稱什麼？",
+            options: ["美酒", "農作物", "書信", "史書"],
+            ans: 1 // B
+          },
+          {
+            q: "古代常說「朱門酒肉臭」中的「朱門」是借代指什麼？",
+            options: ["平民", "富貴人家", "小孩", "老人"],
+            ans: 1 // B
+          },
+          {
+            q: "老師常稱讚同學品學兼優是「杏壇」之光，請問「杏壇」借代指什麼？",
+            options: ["醫學界", "教育界", "富貴人家", "死亡"],
+            ans: 1 // B
+          },
+          {
+            q: "詩詞中常看到的「魚雁」往返，請問「魚雁」借代指什麼？",
+            options: ["女人", "小孩", "書信", "太陽"],
+            ans: 2 // C
+          },
+          {
+            q: "「垂髫」或「總角」之交，請問這兩個詞借代指什麼時期？",
+            options: ["老人", "小孩", "美女", "敗家子"],
+            ans: 1 // B
+          }
+        ]
+      },
+      3: {
+        title: "第三關：象徵大挑戰",
+        description: "國文經典意象與象徵詮釋",
+        questions: [
+          {
+            q: "在傳統文學中，「牡丹」通常用來象徵什麼？",
+            options: ["隱居", "離別", "富貴", "長壽"],
+            ans: 2 // C
+          },
+          {
+            q: "送別詩中常出現「楊柳」，這通常象徵什麼含義？",
+            options: ["愁緒", "離別", "正直", "謙虛"],
+            ans: 1 // B (折柳送別，諧音「留」)
+          },
+          {
+            q: "「松柏後凋於歲寒」，請問「松柏」常象徵什麼美德？",
+            options: ["富貴", "離別", "節操與長壽", "謙虛"],
+            ans: 2 // C
+          },
+          {
+            q: "「未曾出土先有節，及凌雲處尚虛心」，請問「竹子」常象徵什麼？",
+            options: ["長壽", "正直與謙虛", "富貴", "愁"],
+            ans: 1 // B
+          },
+          {
+            q: "古詩詞中的「草」與「流水」往往用來象徵什麼？",
+            options: ["離別", "愁緒", "長壽", "正直"],
+            ans: 1 // B
+          }
+        ]
+      }
+    };
+
+    // --- GAME STATES & VARIABLES ---
+    let currentStage = 1;
+    let currentQuestionIdx = 0;
+    let stageScores = { 1: 0, 2: 0, 3: 0 }; // number of correct answers
+    let stageCompleted = { 1: false, 2: false, 3: false };
+    let questionAnswered = false; // check if user clicked an option
+    let hamsterWeight = 80;
+    let lastMinigame = 'feeding'; // 'feeding', 'wheel', or 'survival'
+    let endingAnimationPlayed = false;
+
+    // Audio Context & Sounds Synthesizer
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Play Synthesized Sounds
+    function playSound(type) {
+      if (!audioCtx) return;
+      
+      const now = audioCtx.currentTime;
+      
+      if (type === 'correct') {
+        // High, chirpy double-beep
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880.00, now + 0.08); // A5
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } 
+      else if (type === 'wrong') {
+        // Low disappointed sliding synth buzz
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220.00, now); // A3
+        osc.frequency.linearRampToValueAtTime(130.81, now + 0.4); // C3
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } 
+      else if (type === 'eat') {
+        // Soft white noise crunch + low frequency pulse
+        const bufferSize = audioCtx.sampleRate * 0.04;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1200;
+        
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.06, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        noise.start(now);
+
+        // Sub tone pop
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.06);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+      else if (type === 'victory') {
+        // Melodic celebratory fanfare
+        const scale = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C4, E4, G4, C5, E5, G5
+        scale.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.09);
+          gain.gain.setValueAtTime(0.06, now + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.3);
+          osc.start(now + i * 0.09);
+          osc.stop(now + i * 0.09 + 0.3);
+        });
+      }
+    }
+
+    // --- NAVIGATION LOGIC ---
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen-view').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // --- INTRO SCENE LOGIC ---
+    let introTimer = null;
+    const introText = "主人～你終於來了！我是你的專屬黃金鼠，接下來要拜託你好好照顧我、幫我通過考驗喔！";
+    let introCharIdx = 0;
+    
+    function initAudioAndStartIntro() {
+      initAudio();
+      endingAnimationPlayed = false;
+      startIntroAnimation();
+    }
+    
+    function startIntroAnimation() {
+      showScreen('intro-view');
+      const textEl = document.getElementById('intro-speech-text');
+      textEl.textContent = "";
+      introCharIdx = 0;
+      
+      // Typewriter effect
+      const typingInterval = setInterval(() => {
+        if (introCharIdx < introText.length) {
+          textEl.textContent += introText[introCharIdx];
+          introCharIdx++;
+          playTypeSound();
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 75);
+      
+      // Progress bar filling up
+      const progressBar = document.getElementById('intro-progress-bar');
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+      setTimeout(() => {
+        progressBar.style.transition = 'width 5s linear';
+        progressBar.style.width = '100%';
+      }, 50);
+      
+      // Auto advance to Stage 1 after 5 seconds
+      introTimer = setTimeout(() => {
+        clearInterval(typingInterval);
+        enterStage(1);
+      }, 5150);
+    }
+    
+    function skipIntro() {
+      clearTimeout(introTimer);
+      enterStage(1);
+    }
+    
+    function playTypeSound() {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(900 + Math.random() * 150, now);
+      gain.gain.setValueAtTime(0.008, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.start(now);
+      osc.stop(now + 0.03);
+    }
+
+    function backToMap() {
+      stopCatLoop();
+      updateMapStatusDisplays();
+      showScreen('map-view');
+    }
+
+    // Map Screen dialogue prompts
+    const hamsterPhrases = [
+      "肚子好餓喔！主人快幫我答題賺葵瓜子！",
+      "今天也要認真讀國文，好想吃葵瓜子啊！",
+      "點擊關卡牌就能開始闖關哦！",
+      "呼～滾輪跑得好累，想吃點點心！",
+      "主人～你最聰明了！一定可以帶我過關！"
+    ];
+
+    function triggerMapHamsterDialogue() {
+      const db = document.getElementById('map-hamster-dialogue');
+      const randomText = hamsterPhrases[Math.floor(Math.random() * hamsterPhrases.length)];
+      db.textContent = randomText;
+      db.classList.add('show');
+      setTimeout(() => {
+        db.classList.remove('show');
+      }, 4000);
+    }
+
+    function updateMapStatusDisplays() {
+      for (let s = 1; s <= 3; s++) {
+        const el = document.getElementById(`status-stage-${s}`);
+        if (stageCompleted[s]) {
+          el.className = "stage-status completed";
+          el.innerHTML = "<span>✨ 已通關 (點擊重玩)</span>";
+        } else {
+          el.className = "stage-status";
+          el.innerHTML = `<span>⭐ 答對: ${stageScores[s]}/5 題</span>`;
+        }
+      }
+    }
+
+    // --- QUIZ VIEW LOGIC ---
+    function updateQuizWeight() {
+      const el = document.getElementById('quiz-weight-counter');
+      if (el) {
+        el.textContent = `黃金鼠：${Math.round(hamsterWeight)}g`;
+      }
+    }
+
+    function enterStage(stageNum) {
+      initAudio();
+      currentStage = stageNum;
+      currentQuestionIdx = 0;
+      stageScores[stageNum] = 0; // Reset score progress when entering
+      questionAnswered = false;
+
+      // Update Top Nav
+      document.getElementById('stage-title-banner').textContent = STAGES[stageNum].title;
+      document.getElementById('score-counter').textContent = `進度：0 / 5`;
+      updateQuizWeight();
+      
+      // Reset Hamster
+      setHamsterState('idle');
+      document.getElementById('hamster-speech-bubble').textContent = "主人加油！答對題目，我就有美味葵瓜子吃啦！";
+
+      // Hide Promote Overlay
+      document.getElementById('quiz-promote-overlay').classList.remove('active');
+
+      // Setup Level 3 Cat Survival Elements
+      const catEl = document.getElementById('cat-element');
+      const cabinEl = document.getElementById('cabin-element');
+      const hideBtn = document.getElementById('hide-btn');
+      
+      if (stageNum === 3) {
+        catEl.style.display = 'flex';
+        cabinEl.style.display = 'block';
+        hideBtn.style.display = 'inline-block';
+        startCatLoop();
+      } else {
+        catEl.style.display = 'none';
+        cabinEl.style.display = 'none';
+        hideBtn.style.display = 'none';
+        stopCatLoop();
+      }
+
+      // Load Question
+      loadQuestion();
+      showScreen('quiz-view');
+    }
+
+    function loadQuestion() {
+      questionAnswered = false;
+      const stageData = STAGES[currentStage];
+      const qData = stageData.questions[currentQuestionIdx];
+
+      // Question Texts
+      document.getElementById('question-index-label').textContent = `第 ${currentQuestionIdx + 1} 題 / 共 ${stageData.questions.length} 題`;
+      document.getElementById('question-text-content').textContent = qData.q;
+
+      // Render Options
+      for (let i = 0; i < 4; i++) {
+        const optBtn = document.querySelectorAll('.option-btn')[i];
+        optBtn.className = "option-btn";
+        
+        // Re-enable if cat is sleeping or not stage 3
+        if (currentStage === 3 && (isHiding || catState === 'alert')) {
+          optBtn.disabled = true;
+        } else {
+          optBtn.disabled = false;
+        }
+        document.getElementById(`opt-${i}`).textContent = qData.options[i];
+      }
+    }
+
+    function selectOption(selectedIdx) {
+      if (questionAnswered) return;
+      
+      // Block click during cat alert or hiding
+      if (currentStage === 3 && (isHiding || catState === 'alert')) {
+        return;
+      }
+      
+      questionAnswered = true;
+
+      const stageData = STAGES[currentStage];
+      const qData = stageData.questions[currentQuestionIdx];
+      const correctIdx = qData.ans;
+
+      // Disable all buttons
+      document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+      const selectedBtn = document.querySelectorAll('.option-btn')[selectedIdx];
+      const correctBtn = document.querySelectorAll('.option-btn')[correctIdx];
+
+      if (selectedIdx === correctIdx) {
+        // Correct
+        selectedBtn.classList.add('correct');
+        stageScores[currentStage]++;
+        playSound('correct');
+        setHamsterState('happy');
+        createFloatingHearts();
+        
+        // Hamster cheers
+        const congrats = ["歐耶！答對了！", "葵瓜子真香，主人太強了！", "真好吃！多來幾顆！", "主人智商爆表了！", "好幸福喔～(嚼嚼)"];
+        document.getElementById('hamster-speech-bubble').textContent = congrats[Math.floor(Math.random() * congrats.length)];
+      } else {
+        // Wrong
+        selectedBtn.classList.add('wrong');
+        correctBtn.classList.add('correct'); // Show correct answer
+        playSound('wrong');
+        setHamsterState('sad');
+        createFallingTears();
+
+        // Hamster cries
+        const complaints = ["嗚嗚...答錯了...", "肚子還是空空的...", "嗚嗚，這題好難喔！", "主人沒關係，下一題加油！", "肚子咕嚕嚕叫了..."];
+        document.getElementById('hamster-speech-bubble').textContent = complaints[Math.floor(Math.random() * complaints.length)];
+      }
+
+      // Update top progress
+      document.getElementById('score-counter').textContent = `進度：${stageScores[currentStage]} / 5`;
+
+      // Check level promotion or load next question after delay
+      setTimeout(() => {
+        if (stageScores[currentStage] >= 5) {
+          // Promoted!
+          stageCompleted[currentStage] = true;
+          playSound('victory');
+          
+          const promoteTitle = document.getElementById('promote-title');
+          const promoteDesc = document.getElementById('promote-desc');
+          const promoteBtn = document.getElementById('promote-btn');
+          
+          if (currentStage === 1) {
+            promoteTitle.textContent = "🎉 第一關挑戰成功 🎉";
+            promoteDesc.textContent = "太厲害了！你已經成功答對 5 題，開啟黃金鼠的【葵瓜子接接樂】小遊戲！準備好控制牠接住落下的種子了嗎？";
+            promoteBtn.textContent = "開啟接葵瓜子小遊戲！";
+          } else if (currentStage === 2) {
+            promoteTitle.textContent = "🎉 第二關挑戰成功 🎉";
+            promoteDesc.textContent = "恭喜你！第二關順利通關！接下來我們要進行【跑滾輪大作戰】，請連點滑鼠或按空白鍵，帶黃金鼠飛速跑起來！";
+            promoteBtn.textContent = "開啟跑滾輪遊戲！";
+          } else if (currentStage === 3) {
+            promoteTitle.textContent = "🎉 終極生存挑戰成功 🎉";
+            promoteDesc.textContent = "不可思議！你在貓咪的威脅下成功答對了 5 題！黃金鼠平安無事，現在讓我們來看看你的培育總結算吧！";
+            promoteBtn.textContent = "查看培育結算！";
+          }
+          
+          document.getElementById('quiz-promote-overlay').classList.add('active');
+          if (currentStage === 3) {
+            stopCatLoop();
+          }
+        } else {
+          // Go to next question (loop back if ended)
+          currentQuestionIdx = (currentQuestionIdx + 1) % stageData.questions.length;
+          setHamsterState('idle');
+          if (currentStage === 3 && isHiding) {
+            // Keep hiding status text
+          } else {
+            document.getElementById('hamster-speech-bubble').textContent = "下一題來囉！主人加油！";
+          }
+          loadQuestion();
+        }
+      }, 2500);
+    }
+
+    function onPromoteButtonClicked() {
+      if (currentStage === 1) {
+        startFeedingGame();
+      } else if (currentStage === 2) {
+        initWheelGame();
+      } else if (currentStage === 3) {
+        endStage3Directly();
+      }
+    }
+
+    function endStage3Directly() {
+      lastMinigame = 'survival';
+      playSound('victory');
+      
+      checkAndPlayEndingAnimation(() => {
+        const finalWeight = Math.round(hamsterWeight);
+        document.getElementById('final-weight-display').textContent = `${finalWeight}g`;
+        
+        let comment = "";
+        if (finalWeight >= 100) {
+          comment = "🐹 恭喜！黃金鼠在貓咪眼皮底下完美存活，體格健壯，主人太厲害了！";
+        } else {
+          comment = "🐹 通關！黃金鼠雖然躲過了貓咪，但被嚇得輕了一圈，多吃點瓜子補回來吧！";
+        }
+        document.getElementById('final-comment-display').textContent = comment;
+        
+        document.getElementById('game-stats-breakdown').innerHTML = `
+          <strong>🏆 躲貓咪生存戰後報表：</strong><br>
+          • 挑戰狀態：<strong>安全通關！🛡️</strong><br>
+          • 黃金鼠最終體重：<strong>${finalWeight}</strong> 公克<br>
+          • 在緊張的獵捕危機中生存，大幅提升了黃金鼠的反應靈敏度！
+        `;
+        
+        updateResultActions();
+        showScreen('result-view');
+      });
+    }
+
+    // Cute SVG states switcher
+    function setHamsterState(state) {
+      const hamster = document.querySelector('.hamster-svg');
+      if (!hamster) return;
+
+      hamster.querySelectorAll('.eye-idle, .eye-happy, .eye-sad, .mouth-idle, .mouth-happy, .mouth-sad, .paw-idle, .paw-happy, .paw-sad').forEach(el => {
+        el.style.display = 'none';
+      });
+
+      hamster.querySelectorAll(`.eye-${state}, .mouth-${state}, .paw-${state}`).forEach(el => {
+        el.style.display = '';
+      });
+
+      if (state === 'sad') {
+        hamster.classList.add('sad-hamster-animation');
+        hamster.classList.remove('happy-hamster-animation');
+      } else if (state === 'happy') {
+        hamster.classList.add('happy-hamster-animation');
+        hamster.classList.remove('sad-hamster-animation');
+      } else {
+        hamster.classList.remove('happy-hamster-animation', 'sad-hamster-animation');
+      }
+    }
+
+    // Hearts animations for correct answers
+    function createFloatingHearts() {
+      const container = document.getElementById('hearts-layer');
+      container.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = `${60 + Math.random() * 120}px`;
+        heart.style.setProperty('--rand-x', `${(Math.random() - 0.5) * 60}px`);
+        heart.style.animationDelay = `${Math.random() * 0.4}s`;
+        container.appendChild(heart);
+      }
+    }
+
+    // Tears animations for incorrect answers
+    function createFallingTears() {
+      const container = document.getElementById('tears-layer');
+      container.innerHTML = '';
+      const eyeCoords = [
+        { x: 80, delay: 0 },
+        { x: 155, delay: 0.1 },
+        { x: 83, delay: 0.3 },
+        { x: 152, delay: 0.4 }
+      ];
+
+      eyeCoords.forEach(coord => {
+        const tear = document.createElement('div');
+        tear.className = 'falling-tear';
+        tear.style.left = `${coord.x}px`;
+        tear.style.top = `110px`;
+        tear.style.animationDelay = `${coord.delay}s`;
+        container.appendChild(tear);
+      });
+    }
+
+    // --- STAGE 3 CAT SURVIVAL HAZARD LOGIC ---
+    let isHiding = false;
+    let isAttacking = false;
+    let catState = 'sleeping'; // 'sleeping' or 'alert'
+    let catCountdown = 3;
+    let catCountdownInterval = null;
+    let catAlertTimeout = null;
+
+    function onHamsterClicked() {
+      if (currentStage !== 3) return;
+      if (isHiding) {
+        if (catState === 'sleeping' && !isAttacking) {
+          comeOutFromHiding();
+        }
+      } else {
+        goIntoHiding();
+      }
+    }
+
+    function goIntoHiding() {
+      if (currentStage !== 3 || isHiding || isAttacking) return;
+      isHiding = true;
+      document.getElementById('hamster-speech-bubble').textContent = "（快速躲進小木屋中...）";
+      
+      const hamster = document.querySelector('.hamster-svg');
+      hamster.classList.add('hiding');
+      
+      // Disable buttons while hiding
+      document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+    }
+
+    function comeOutFromHiding() {
+      if (!isHiding) return;
+      isHiding = false;
+      document.getElementById('hamster-speech-bubble').textContent = "呼，貓咪沒在看，安全出來囉！";
+      
+      const hamster = document.querySelector('.hamster-svg');
+      hamster.classList.remove('hiding');
+      
+      // Restore answer buttons if not already answered
+      if (!questionAnswered) {
+        document.querySelectorAll('.option-btn').forEach(btn => {
+          if (catState !== 'alert' && !isAttacking) {
+            btn.disabled = false;
+          }
+        });
+      }
+    }
+
+    function startCatLoop() {
+      stopCatLoop();
+      isHiding = false;
+      isAttacking = false;
+      catState = 'sleeping';
+      setCatStateUI('sleeping');
+      scheduleNextCatAlert();
+    }
+
+    function stopCatLoop() {
+      clearTimeout(catAlertTimeout);
+      clearInterval(catCountdownInterval);
+      
+      const catTimerText = document.getElementById('cat-timer-text');
+      if (catTimerText) catTimerText.style.display = 'none';
+      
+      isAttacking = false;
+      comeOutFromHiding();
+    }
+
+    function scheduleNextCatAlert() {
+      // Sleeps between 5 to 9 seconds
+      const sleepTime = 5000 + Math.random() * 4000;
+      catAlertTimeout = setTimeout(() => {
+        triggerCatAlert();
+      }, sleepTime);
+    }
+
+    function triggerCatAlert() {
+      if (currentStage !== 3 || questionAnswered) {
+        // Skip alert if transitioning
+        scheduleNextCatAlert();
+        return;
+      }
+
+      catState = 'alert';
+      setCatStateUI('alert');
+      playSound('wrong'); // Warning sound
+
+      catCountdown = 3;
+      const catTimerText = document.getElementById('cat-timer-text');
+      catTimerText.textContent = catCountdown;
+      catTimerText.style.display = 'flex';
+
+      catCountdownInterval = setInterval(() => {
+        catCountdown--;
+        if (catCountdown > 0) {
+          catTimerText.textContent = catCountdown;
+        } else {
+          clearInterval(catCountdownInterval);
+          catTimerText.style.display = 'none';
+          checkCatAttackResult();
+        }
+      }, 1000);
+    }
+
+    function checkCatAttackResult() {
+      isAttacking = true;
+      if (isHiding) {
+        // Safe inside
+        document.getElementById('cat-status-label').textContent = "🐱 貓咪咬了個空！安全過關！";
+        playSound('correct');
+
+        setTimeout(() => {
+          catState = 'sleeping';
+          setCatStateUI('sleeping');
+          isAttacking = false;
+          comeOutFromHiding();
+          scheduleNextCatAlert();
+        }, 1800);
+      } else {
+        // Caught
+        document.getElementById('cat-status-label').textContent = "🐱 糟了！黃金鼠被貓咪抓到了！";
+        playSound('wrong');
+        triggerScratchEffect();
+
+        // Penalty
+        hamsterWeight = Math.max(40, hamsterWeight - 10);
+        updateQuizWeight();
+        document.getElementById('hamster-speech-bubble').textContent = "好痛！被貓咪抓到了... (體重 -10g)";
+
+        setTimeout(() => {
+          catState = 'sleeping';
+          setCatStateUI('sleeping');
+          isAttacking = false;
+          scheduleNextCatAlert();
+        }, 1800);
+      }
+    }
+
+    function setCatStateUI(state) {
+      const catBox = document.getElementById('cat-element');
+      const catStatusLabel = document.getElementById('cat-status-label');
+      const catEyesSleeping = document.getElementById('cat-eyes-sleeping');
+      const catEyesAlert = document.getElementById('cat-eyes-alert');
+      
+      if (state === 'sleeping') {
+        catBox.classList.remove('danger');
+        catStatusLabel.textContent = "貓咪正在睡覺... 安心答題！";
+        catEyesSleeping.style.display = 'block';
+        catEyesAlert.style.display = 'none';
+      } else {
+        catBox.classList.add('danger');
+        catStatusLabel.textContent = "⚠️ 貓咪張眼警戒了！快點擊黃金鼠躲避！";
+        catEyesSleeping.style.display = 'none';
+        catEyesAlert.style.display = 'block';
+        
+        // Disable answering options immediately
+        document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+      }
+    }
+
+    function triggerScratchEffect() {
+      const container = document.getElementById('game-container');
+      container.classList.add('scratch-flash');
+      setTimeout(() => {
+        container.classList.remove('scratch-flash');
+      }, 500);
+    }
+
+
+    // --- FEEDING CHALLENGE GAME LOGIC (STAGE 1 MINIGAME) ---
+    let canvas, ctx;
+    let gameInterval = null;
+    let countdownTimer = null;
+    let keys = {};
+    let gameTime = 20; // 20 seconds
+    let seeds = [];
+    let scorePopups = [];
+    let isGameRunning = false;
+    let plateX = 250;
+    const plateWidth = 100;
+    const plateHeight = 16;
+    let frameId = null;
+
+    function startFeedingGame() {
+      lastMinigame = 'feeding';
+      showScreen('game-view');
+      initFeedingArena();
+    }
+
+    function restartFeedingGame() {
+      lastMinigame = 'feeding';
+      showScreen('game-view');
+      initFeedingArena();
+    }
+
+    function initFeedingArena() {
+      canvas = document.getElementById('game-canvas');
+      ctx = canvas.getContext('2d');
+      
+      // RWD canvas resizing
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      // Reset parameters
+      hamsterWeight = 80;
+      gameTime = 20;
+      seeds = [];
+      scorePopups = [];
+      plateX = canvas.width / 2;
+      isGameRunning = false;
+
+      updateHUD();
+
+      // Show countdown overlay
+      const countdownScreen = document.getElementById('game-countdown-screen');
+      countdownScreen.style.opacity = '1';
+      countdownScreen.style.display = 'flex';
+
+      let count = 3;
+      document.getElementById('countdown-text').textContent = count;
+
+      // Event handlers
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+      clearInterval(countdownTimer);
+      countdownTimer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          document.getElementById('countdown-text').textContent = count;
+        } else if (count === 0) {
+          document.getElementById('countdown-text').textContent = "GO!";
+          playSound('correct');
+        } else {
+          clearInterval(countdownTimer);
+          countdownScreen.style.opacity = '0';
+          setTimeout(() => countdownScreen.style.display = 'none', 300);
+          startGameLoop();
+        }
+      }, 1000);
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width || 600;
+      canvas.height = rect.height || 480;
+    }
+
+    function handleKeyDown(e) {
+      keys[e.key] = true;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+      }
+    }
+
+    function handleKeyUp(e) {
+      keys[e.key] = false;
+    }
+
+    function handleMouseMove(e) {
+      if (!isGameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      plateX = Math.max(plateWidth/2, Math.min(canvas.width - plateWidth/2, mouseX));
+    }
+
+    function handleTouchMove(e) {
+      if (!isGameRunning || e.touches.length === 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const touchX = e.touches[0].clientX - rect.left;
+      plateX = Math.max(plateWidth/2, Math.min(canvas.width - plateWidth/2, touchX));
+    }
+
+    function updateHUD() {
+      document.getElementById('timer-val').textContent = gameTime;
+      document.getElementById('weight-val').textContent = Math.round(hamsterWeight);
+
+      // Scale the hamster based on weight
+      const hamsterContainer = document.getElementById('arena-hamster-container');
+      const scaleFactor = 1 + (hamsterWeight - 80) * 0.0035;
+      hamsterContainer.style.transform = `translateX(-50%) scale(${scaleFactor})`;
+    }
+
+    function startGameLoop() {
+      isGameRunning = true;
+      
+      clearInterval(gameInterval);
+      gameInterval = setInterval(() => {
+        gameTime--;
+        updateHUD();
+        if (gameTime <= 0) {
+          endFeedingGame();
+        }
+      }, 1000);
+
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(gameTick);
+    }
+
+    function spawnSeed() {
+      const speedMult = 1.0 + (20 - gameTime) * 0.08;
+      seeds.push({
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: -30,
+        width: 16,
+        height: 25,
+        speed: (Math.random() * 3 + 2.5) * speedMult,
+        angle: (Math.random() - 0.5) * 0.05,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.1
+      });
+    }
+
+    function gameTick() {
+      if (!isGameRunning) return;
+
+      const speed = 7;
+      if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+        plateX = Math.max(plateWidth/2, plateX - speed);
+      }
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+        plateX = Math.min(canvas.width - plateWidth/2, plateX + speed);
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (Math.random() < 0.045 + (20 - gameTime) * 0.002) {
+        spawnSeed();
+      }
+
+      drawPlate();
+
+      for (let i = seeds.length - 1; i >= 0; i--) {
+        const seed = seeds[i];
+        seed.y += seed.speed;
+        seed.x += Math.sin(seed.y * 0.02) * 0.6;
+        seed.rot += seed.rotSpeed;
+
+        drawSeed(seed);
+
+        if (seed.y > canvas.height + 40) {
+          seeds.splice(i, 1);
+          continue;
+        }
+
+        const plateTopY = canvas.height - 45;
+        const plateBottomY = plateTopY + plateHeight;
+
+        if (seed.y + seed.height/2 >= plateTopY && 
+            seed.y - seed.height/2 <= plateBottomY && 
+            seed.x >= plateX - plateWidth/2 && 
+            seed.x <= plateX + plateWidth/2) {
+          
+          triggerSeedEatSuccess(seed);
+          seeds.splice(i, 1);
+        }
+      }
+
+      updateAndDrawPopups();
+      frameId = requestAnimationFrame(gameTick);
+    }
+
+    function drawPlate() {
+      const plateY = canvas.height - 45;
+      
+      ctx.save();
+      const grad = ctx.createLinearGradient(plateX - plateWidth/2, plateY, plateX + plateWidth/2, plateY + plateHeight);
+      grad.addColorStop(0, '#81C784'); // Light green leaf
+      grad.addColorStop(1, '#4CAF50'); // Forest green leaf
+
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#2E7D32';
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(plateX - plateWidth/2, plateY + 6);
+      ctx.quadraticCurveTo(plateX, plateY + plateHeight + 6, plateX + plateWidth/2, plateY + 6);
+      ctx.quadraticCurveTo(plateX, plateY - 2, plateX - plateWidth/2, plateY + 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(plateX - plateWidth/2 + 10, plateY + 5);
+      ctx.lineTo(plateX + plateWidth/2 - 10, plateY + 5);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawSeed(seed) {
+      ctx.save();
+      ctx.translate(seed.x, seed.y);
+      ctx.rotate(seed.rot);
+
+      ctx.beginPath();
+      ctx.moveTo(0, -seed.height / 2);
+      ctx.bezierCurveTo(seed.width / 2, -seed.height / 6, seed.width / 2, seed.height / 2, 0, seed.height / 2);
+      ctx.bezierCurveTo(-seed.width / 2, seed.height / 2, -seed.width / 2, -seed.height / 6, 0, -seed.height / 2);
+      
+      const seedGrad = ctx.createLinearGradient(0, -seed.height/2, 0, seed.height/2);
+      seedGrad.addColorStop(0, '#4E342E');
+      seedGrad.addColorStop(1, '#3E2723');
+      ctx.fillStyle = seedGrad;
+      ctx.fill();
+      
+      ctx.strokeStyle = '#27120F';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ECEFF1';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -seed.height/2 + 3);
+      ctx.lineTo(0, seed.height/2 - 2);
+      ctx.moveTo(-3, -seed.height/6);
+      ctx.quadraticCurveTo(-2, seed.height/4, 0, seed.height/2 - 2);
+      ctx.moveTo(3, -seed.height/6);
+      ctx.quadraticCurveTo(2, seed.height/4, 0, seed.height/2 - 2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function triggerSeedEatSuccess(seed) {
+      playSound('eat');
+      hamsterWeight += 10;
+      updateHUD();
+
+      const hamsterContainer = document.getElementById('arena-hamster-container');
+      hamsterContainer.style.transform += ' translateY(12px) scaleY(0.85)';
+      setTimeout(() => {
+        const scaleFactor = 1 + (hamsterWeight - 80) * 0.0035;
+        hamsterContainer.style.transform = `translateX(-50%) scale(${scaleFactor})`;
+      }, 100);
+
+      createScorePopup(seed.x, canvas.height - 65, "+10g");
+    }
+
+    function createScorePopup(x, y, text) {
+      scorePopups.push({
+        x: x,
+        y: y,
+        text: text,
+        alpha: 1,
+        life: 40
+      });
+    }
+
+    function updateAndDrawPopups() {
+      ctx.save();
+      for (let i = scorePopups.length - 1; i >= 0; i--) {
+        const popup = scorePopups[i];
+        popup.y -= 1.5;
+        popup.alpha -= 0.025;
+        popup.life--;
+
+        ctx.font = 'bold 20px "Fredoka", "Noto Sans TC"';
+        ctx.fillStyle = `rgba(230, 92, 102, ${popup.alpha})`;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${popup.alpha})`;
+        ctx.lineWidth = 3;
+        ctx.textAlign = 'center';
+        ctx.strokeText(popup.text, popup.x, popup.y);
+        ctx.fillText(popup.text, popup.x, popup.y);
+
+        if (popup.life <= 0) {
+          scorePopups.splice(i, 1);
+        }
+      }
+      ctx.restore();
+    }
+
+    function endFeedingGame() {
+      isGameRunning = false;
+      clearInterval(gameInterval);
+      if (frameId) cancelAnimationFrame(frameId);
+      
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      
+      playSound('victory');
+
+      checkAndPlayEndingAnimation(() => {
+        const finalWeight = Math.round(hamsterWeight);
+        document.getElementById('final-weight-display').textContent = `${finalWeight}g`;
+
+        let comment = "";
+        if (finalWeight < 140) {
+          comment = "🐹 黃金鼠吃得飽飽的，正滿足地摸摸肚子，變健康結實囉！";
+        } else if (finalWeight >= 140 && finalWeight < 230) {
+          comment = "🐹 哇！黃金鼠變得圓滾滾的，像顆軟綿綿的麻糬，太可愛了！";
+        } else {
+          comment = "🐹 太厲害了！黃金鼠被你養成了超級大福，圓到快要滾出去啦！";
+        }
+        document.getElementById('final-comment-display').textContent = comment;
+
+        const caughtCount = (finalWeight - 80) / 10;
+        document.getElementById('game-stats-breakdown').innerHTML = `
+          <strong>🏆 餵食成果數據分析：</strong><br>
+          • 本次成功接到 <strong>${caughtCount}</strong> 顆葵瓜子<br>
+          • 黃金鼠體重成長了 <strong>${finalWeight - 80}</strong> 公克<br>
+          • 感謝主人細心的照料，黃金鼠現在精神百倍！
+        `;
+
+        updateResultActions();
+        showScreen('result-view');
+      });
+    }
+
+
+    // --- STAGE 2 SPIN WHEEL GAME LOGIC ---
+    let wheelAngle = 0;
+    let wheelSpeed = 0;
+    let wheelProgress = 0;
+    let wheelGameTime = 20;
+    let wheelTimerInterval = null;
+    let wheelLoopInterval = null;
+    let isWheelGameRunning = false;
+
+    function initWheelGame() {
+      lastMinigame = 'wheel';
+      showScreen('wheel-view');
+      
+      wheelAngle = 0;
+      wheelSpeed = 0;
+      wheelProgress = 0;
+      wheelGameTime = 20;
+      isWheelGameRunning = true;
+      
+      document.getElementById('wheel-timer-val').textContent = wheelGameTime;
+      document.getElementById('wheel-speed-val').textContent = "0";
+      document.getElementById('wheel-progress-bar').style.width = '0%';
+      document.getElementById('wheel-progress-text').textContent = '0%';
+      document.getElementById('wheel-hamster').classList.remove('running');
+      
+      window.addEventListener('keydown', handleWheelKeyDown);
+      
+      // Timer Interval (20s)
+      clearInterval(wheelTimerInterval);
+      wheelTimerInterval = setInterval(() => {
+        wheelGameTime--;
+        document.getElementById('wheel-timer-val').textContent = wheelGameTime;
+        if (wheelGameTime <= 0) {
+          endWheelGame(false);
+        }
+      }, 1000);
+      
+      // Physics loops (30ms refresh)
+      clearInterval(wheelLoopInterval);
+      wheelLoopInterval = setInterval(() => {
+        if (!isWheelGameRunning) return;
+        
+        // Apply friction
+        wheelSpeed *= 0.95;
+        if (wheelSpeed < 0.15) wheelSpeed = 0;
+        
+        wheelAngle += wheelSpeed;
+        document.getElementById('wheel-svg-rotate').style.transform = `rotate(${wheelAngle}deg)`;
+        
+        // Update speedometer display
+        const speedDisplay = Math.round(wheelSpeed * 0.4);
+        document.getElementById('wheel-speed-val').textContent = speedDisplay;
+        
+        // Bounce animation toggle based on speed
+        const hamster = document.getElementById('wheel-hamster');
+        if (wheelSpeed > 2.5) {
+          hamster.classList.add('running');
+        } else {
+          hamster.classList.remove('running');
+        }
+        
+        // Progress accumulation
+        if (wheelSpeed > 0) {
+          wheelProgress = Math.min(100, wheelProgress + wheelSpeed * 0.006);
+          document.getElementById('wheel-progress-bar').style.width = `${wheelProgress}%`;
+          document.getElementById('wheel-progress-text').textContent = `${Math.round(wheelProgress)}%`;
+          
+          if (wheelProgress >= 100) {
+            endWheelGame(true);
+          }
+        }
+      }, 30);
+    }
+
+    function handleWheelKeyDown(e) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        triggerSpin();
+      }
+    }
+
+    function triggerSpin() {
+      if (!isWheelGameRunning) return;
+      
+      // Speed acceleration boost
+      wheelSpeed = Math.min(70, wheelSpeed + 8.5);
+      playSound('eat'); // Cute clicky chirp sound
+      
+      // Grow slightly during training
+      hamsterWeight = Math.min(300, hamsterWeight + 0.4);
+    }
+
+    function endWheelGame(isWin) {
+      isWheelGameRunning = false;
+      clearInterval(wheelTimerInterval);
+      clearInterval(wheelLoopInterval);
+      window.removeEventListener('keydown', handleWheelKeyDown);
+      
+      playSound('victory');
+
+      if (isWin) {
+        hamsterWeight += 35; // Completion bonus weight
+      } else {
+        hamsterWeight += 12; // Base exercise weight
+      }
+      
+      checkAndPlayEndingAnimation(() => {
+        const finalWeight = Math.round(hamsterWeight);
+        document.getElementById('final-weight-display').textContent = `${finalWeight}g`;
+        
+        let comment = "";
+        if (isWin) {
+          comment = "自由地奔跑！🐹 黃金鼠瘋狂跑滾輪挑戰大成功！體力充沛，胃口大開！";
+        } else {
+          comment = "跑累了... 🐹 黃金鼠在滾輪上睡著了，休息一下下次再挑戰吧！";
+        }
+        document.getElementById('final-comment-display').textContent = comment;
+        
+        document.getElementById('game-stats-breakdown').innerHTML = `
+          <strong>🏆 滾輪大挑戰訓練分析：</strong><br>
+          • 挑戰狀態：<strong>${isWin ? '完美過關！🎉' : '時間終了 (未集滿)...💤'}</strong><br>
+          • 黃金鼠最終體重：<strong>${finalWeight}</strong> 公克<br>
+          • 運動讓黃金鼠的肌肉強度與健康指標大幅度提昇，活力爆表！
+        `;
+        
+        updateResultActions();
+        showScreen('result-view');
+      });
+    }
+
+    // Dynamic restart buttons on Results
+    function updateResultActions() {
+      const restartBtn = document.getElementById('result-restart-btn');
+      if (lastMinigame === 'feeding') {
+        restartBtn.textContent = "再玩一次接葵瓜子";
+      } else if (lastMinigame === 'wheel') {
+        restartBtn.textContent = "再玩一次跑滾輪";
+      } else if (lastMinigame === 'survival') {
+        restartBtn.textContent = "再挑戰第三關";
+      }
+    }
+
+    function restartLastGame() {
+      if (lastMinigame === 'feeding') {
+        restartFeedingGame();
+      } else if (lastMinigame === 'wheel') {
+        initWheelGame();
+      } else if (lastMinigame === 'survival') {
+        enterStage(3);
+      }
+    }
+
+    // --- GAME ENDING ANIMATION LOGIC ---
+    function checkAndPlayEndingAnimation(fallbackCallback) {
+      if (stageCompleted[1] && stageCompleted[2] && stageCompleted[3]) {
+        if (!endingAnimationPlayed) {
+          endingAnimationPlayed = true;
+          playEndingAnimation();
+          return true;
+        }
+      }
+      fallbackCallback();
+      return false;
+    }
+
+    function playEndingAnimation() {
+      // 1. Show ending screen
+      document.getElementById('ending-view').classList.remove('fade-out');
+      showScreen('ending-view');
+      
+      // 2. Generate dense sunflower seeds rain
+      const rainContainer = document.getElementById('seeds-rain-layer');
+      rainContainer.innerHTML = '';
+      for (let i = 0; i < 65; i++) {
+        const seed = document.createElement('div');
+        seed.className = 'falling-sunflower-seed';
+        seed.style.left = `${Math.random() * 100}%`;
+        seed.style.top = `-${Math.random() * 25 + 5}%`;
+        const duration = Math.random() * 1.8 + 1.2; // 1.2s to 3.0s for lively rain
+        const delay = Math.random() * 4.5;
+        seed.style.animation = `fallSeed ${duration}s linear infinite`;
+        seed.style.animationDelay = `${delay}s`;
+        
+        const size = Math.random() * 6 + 10; // 10px to 16px width
+        seed.style.width = `${size}px`;
+        seed.style.height = `${size * 1.45}px`;
+        rainContainer.appendChild(seed);
+      }
+      
+      // 3. Play sounds if audio initialized
+      if (audioCtx) {
+        playSound('victory');
+        setTimeout(() => { playSound('eat'); }, 400);
+        setTimeout(() => { playSound('eat'); }, 800);
+        setTimeout(() => { playSound('eat'); }, 1200);
+        setTimeout(() => { playSound('eat'); }, 1600);
+        setTimeout(() => { playSound('victory'); }, 2200);
+        setTimeout(() => { playSound('eat'); }, 2800);
+        setTimeout(() => { playSound('eat'); }, 3400);
+      }
+      
+      // 4. Smooth fade out starting at 4.5s
+      setTimeout(() => {
+        document.getElementById('ending-view').classList.add('fade-out');
+      }, 4500);
+      
+      // 5. Transition to final results screen at exactly 5.0s
+      setTimeout(() => {
+        const finalWeight = Math.round(hamsterWeight);
+        document.getElementById('final-weight-display').textContent = `${finalWeight}g`;
+        
+        const comment = "🐹 恭喜！你成功引起了霸總黃金鼠的注意，正式成為牠的專屬飼主！";
+        document.getElementById('final-comment-display').textContent = comment;
+        
+        document.getElementById('game-stats-breakdown').innerHTML = `
+          <strong>🏆 國文大冒險全通關報表：</strong><br>
+          • 總通關關卡：<strong>3 / 3 滿分通關！🎖️</strong><br>
+          • 總答對題數：<strong>15 / 15 題庫全破！🔥</strong><br>
+          • 黃金鼠最終體重：<strong>${finalWeight}</strong> 公克<br>
+          • 評價：您已經是國文大師，成功引起了霸道總裁黃金鼠的注意！
+        `;
+        
+        updateResultActions();
+        showScreen('result-view');
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

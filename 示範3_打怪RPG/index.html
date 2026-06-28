@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>打怪 RPG 進階版 - 國學挑戰冒險</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;800&family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+    :root {
+      --bg-dark: #0a0813;
+      --bg-panel: #131024;
+      --bg-panel-light: #1f1b3a;
+      --border-purple: #4c1d95;
+      --border-purple-light: #7c3aed;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      --gold: #facc15;
+      --gold-hover: #fef08a;
+      --gold-dark: #b45309;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --wood: #543118;
+      --wood-light: #854d0e;
+      --wood-dark: #271306;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text-light);
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 15%, rgba(124, 58, 237, 0.22) 0%, transparent 60%),
+        radial-gradient(circle at 10% 85%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+      font-family: 'Outfit', 'Noto Sans TC', system-ui, sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    button {
+      font: inherit;
+      border: 0;
+      outline: none;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 2px solid var(--border-purple-light);
+      border-radius: 10px;
+      background: rgba(19,16,36,0.9);
+      color: var(--purple2);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 200;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    }
+
+    .back-btn:hover {
+      background: rgba(40,30,70,0.95);
+      transform: translateY(-2px);
+    }
+
+    .screen {
+      min-height: 100vh;
+      width: min(960px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 20px 0 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* --- Loading Screen --- */
+    .loading {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: radial-gradient(circle, #17122b 0%, #07050d 100%);
+    }
+
+    .loader-card {
+      width: min(90vw, 450px);
+      padding: 36px 24px;
+      border: 4px solid var(--border-purple-light);
+      border-radius: 20px;
+      background: rgba(19, 16, 36, 0.95);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(124, 58, 237, 0.3);
+      position: relative;
+    }
+
+    .spinner {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 24px;
+      border: 6px solid rgba(139, 92, 246, 0.15);
+      border-top-color: var(--gold);
+      border-right-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 1s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite;
+    }
+
+    .pixel-title {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      font-weight: 900;
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, var(--gold) 0%, #f97316 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .loading-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* --- Game Header --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      background: rgba(19, 16, 36, 0.6);
+      border: 2px solid rgba(124, 58, 237, 0.25);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fff 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header .sub {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .coins-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border: 3px solid var(--gold);
+      border-radius: 99px;
+      background: linear-gradient(135deg, #451a03, #1c1917);
+      color: var(--gold);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      transition: transform 0.1s ease;
+    }
+
+    .coins-badge.bump {
+      animation: coinBump 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* --- Arena Area --- */
+    .arena {
+      border: 4px solid var(--border-purple);
+      border-radius: 24px;
+      background: 
+        radial-gradient(circle at center, rgba(31, 27, 58, 0.85) 0%, rgba(13, 11, 24, 0.96) 100%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px);
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.75),
+        inset 0 0 30px rgba(124, 58, 237, 0.15);
+      padding: 24px;
+      position: relative;
+      overflow: visible; /* To allow floating text to peek slightly */
+    }
+
+    .battle-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .fighter {
+      border: 3px solid rgba(124, 58, 237, 0.4);
+      border-radius: 18px;
+      background: rgba(13, 11, 24, 0.8);
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-height: 250px;
+      justify-content: center;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .fighter-tag {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-light);
+      background: rgba(124, 58, 237, 0.35);
+      padding: 4px 12px;
+      border-radius: 99px;
+      border: 1px solid rgba(124, 58, 237, 0.5);
+    }
+
+    .name-tag {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .sprite {
+      font-size: 5.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+      animation: float 3s ease-in-out infinite;
+      display: inline-block;
+      margin: 10px 0;
+    }
+
+    /* Animations for attack & hurt */
+    .sprite.attack-hero {
+      animation: attackHero 0.4s ease-out;
+    }
+
+    .sprite.attack-monster {
+      animation: attackMonster 0.4s ease-out;
+    }
+
+    .sprite.hurt {
+      animation: hurtEffect 0.4s ease-out;
+    }
+
+    .vs-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .vs-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--red) 0%, #7f1d1d 100%);
+      border: 3px solid var(--text-light);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4), 0 0 10px var(--red);
+      z-index: 5;
+    }
+
+    /* --- Double-layered HP Bar --- */
+    .hpbar-container {
+      width: 100%;
+    }
+
+    .hpbar {
+      height: 20px;
+      border: 3px solid #231d3a;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #090712;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .hpfill-catchup {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: #f87171;
+      transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 1;
+    }
+
+    .hpfill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+      transition: width 0.15s ease-out;
+      z-index: 2;
+    }
+
+    .hpfill.mid {
+      background: linear-gradient(90deg, #eab308 0%, #facc15 100%);
+    }
+
+    .hpfill.low {
+      background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+      animation: hpBlink 0.5s ease-in-out infinite alternate;
+    }
+
+    .hptext {
+      margin: 4px 0 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    /* --- Question Card --- */
+    .question-card {
+      position: relative;
+      border: 3px solid var(--purple);
+      border-radius: 16px;
+      background: rgba(248, 250, 252, 0.97);
+      color: #0f172a;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.3);
+    }
+
+    .question-card::before {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 22px;
+      height: 22px;
+      background: #f8fafc;
+      border-right: 3px solid var(--purple);
+      border-bottom: 3px solid var(--purple);
+      z-index: 1;
+    }
+
+    .question-level {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: #0f172a;
+      color: var(--gold);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .question-text {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    /* --- Answers Area --- */
+    .answers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .answer {
+      min-height: 64px;
+      padding: 14px 20px;
+      border: 3px solid var(--border-purple);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #231b3e 0%, #150f28 100%);
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-align: left;
+      box-shadow: 0 6px 0 #0f0b1d;
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .answer:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: var(--border-purple-light);
+      box-shadow: 0 8px 0 #0f0b1d, 0 4px 15px rgba(124, 58, 237, 0.25);
+    }
+
+    .answer:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #0f0b1d;
+    }
+
+    .answer:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .answer.correct {
+      background: linear-gradient(180deg, #10b981 0%, #064e3b 100%) !important;
+      border-color: #34d399 !important;
+      box-shadow: 0 6px 0 #043e2e !important;
+      color: #fff !important;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .answer.wrong {
+      background: linear-gradient(180deg, #ef4444 0%, #7f1d1d 100%) !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 6px 0 #5c1111 !important;
+      color: #fff !important;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .message-banner {
+      min-height: 38px;
+      margin: 16px 0 0;
+      color: var(--gold);
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      line-height: 1.4;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      background: linear-gradient(180deg, var(--gold) 0%, #d97706 100%);
+      color: #271306;
+      font-weight: 800;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #78350f;
+      transition: all 0.1s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 #78350f, 0 4px 12px rgba(250, 204, 21, 0.35);
+    }
+
+    .btn-action:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #78350f;
+    }
+
+    /* --- Floating Combat Text System --- */
+    .floating-text {
+      position: absolute;
+      pointer-events: none;
+      z-index: 99;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--red);
+      text-shadow: 2px 2px 0 #000;
+      animation: floatUpAndOut 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      white-space: nowrap;
+    }
+
+    .floating-text.crit {
+      font-size: 1.8rem;
+      color: var(--gold);
+      text-shadow: 3px 3px 0 #000, 0 0 12px rgba(250, 204, 21, 0.5);
+    }
+
+    .floating-text.gold {
+      color: #fbbf24;
+      font-size: 1.4rem;
+      text-shadow: 2px 2px 0 #000, 0 0 8px rgba(251, 191, 36, 0.4);
+    }
+
+    .floating-text.heal {
+      color: #34d399;
+      font-size: 1.4rem;
+      text-shadow: 2px 2px 0 #000, 0 0 8px rgba(52, 211, 153, 0.4);
+    }
+
+    /* --- Critical Overlay Flash --- */
+    .critical-effect-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      z-index: 80;
+      pointer-events: none;
+      color: #fffbeb;
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(2rem, 10vw, 5rem);
+      font-weight: 900;
+      text-shadow: 0 10px 0 rgba(0,0,0,0.5);
+      -webkit-text-stroke: 4px var(--red);
+      paint-order: stroke fill;
+    }
+
+    .critical-effect-overlay.show {
+      display: grid;
+      animation: criticalTextScale 0.8s ease-out forwards;
+    }
+
+    /* --- Screen Shake & Flash Keyframes --- */
+    .arena.shake {
+      animation: screenShake 0.35s ease-in-out;
+    }
+
+    .arena.correct-flash {
+      animation: flashGreen 0.25s ease-out;
+    }
+
+    .arena.critical-flash {
+      animation: flashRed 0.4s ease-out;
+    }
+
+    /* --- Overlay Backdrop --- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 16px;
+      z-index: 100;
+      background: rgba(5, 3, 10, 0.82);
+      backdrop-filter: blur(8px);
+    }
+
+    .overlay.show {
+      display: grid;
+    }
+
+    /* --- Panels --- */
+    .panel {
+      width: min(100%, 580px);
+      border: 4px solid var(--border-purple-light);
+      border-radius: 20px;
+      background: var(--bg-panel);
+      padding: 28px 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(124, 58, 237, 0.2);
+      text-align: center;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* --- Medieval Shop UI --- */
+    .shop-panel {
+      background:
+        linear-gradient(rgba(39, 21, 10, 0.96), rgba(24, 12, 5, 0.98)),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 6px, transparent 6px, transparent 30px);
+      border: 4px solid #b45309;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.95),
+        inset 0 0 30px rgba(180, 83, 9, 0.2);
+      color: #fef3c7;
+    }
+
+    .shop-panel h2 {
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #fef08a 0%, #f97316 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .shop-desc {
+      color: #fbd5c6;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .item-card {
+      border: 3px solid #78350f;
+      border-radius: 14px;
+      background: rgba(39, 21, 10, 0.5);
+      padding: 16px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    }
+
+    .item-card:hover {
+      transform: translateY(-4px);
+      border-color: #f59e0b;
+      background: rgba(39, 21, 10, 0.8);
+      box-shadow: 0 10px 20px rgba(245, 158, 11, 0.15);
+    }
+
+    .item-icon {
+      font-size: 2.8rem;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    }
+
+    .item-card h3 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      color: #fffbeb;
+      font-weight: 800;
+    }
+
+    .item-desc {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #fbd5c6;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .item-cost {
+      margin: 6px 0;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    .item-owned {
+      margin: 0 0 8px;
+      font-size: 0.75rem;
+      color: #d97706;
+      font-weight: bold;
+    }
+
+    .btn-buy {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+      color: #fff;
+      border: 2px solid #78350f;
+      box-shadow: 0 3px 0 #78350f;
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    .btn-buy:hover:not(:disabled) {
+      background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+      box-shadow: 0 4px 0 #78350f;
+    }
+
+    .btn-buy:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #78350f;
+    }
+
+    .btn-buy:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      border-color: #573319;
+      background: #3d2211;
+    }
+
+    /* --- Backpack Grid UI --- */
+    .bag-list {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .bag-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: var(--bg-panel-light);
+      border: 2px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .bag-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bag-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .bag-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-use {
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+      color: #fff;
+      border: 2px solid #064e3b;
+      box-shadow: 0 3px 0 #064e3b;
+      cursor: pointer;
+    }
+
+    .btn-use:hover:not(:disabled) {
+      background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+    }
+
+    .btn-use:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #064e3b;
+    }
+
+    .btn-use:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* --- Game Over Overlay --- */
+    .game-over-panel {
+      background: radial-gradient(circle, #3b0712 0%, #0f0206 100%);
+      border: 4px solid var(--red);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(239, 68, 68, 0.4);
+    }
+
+    .game-over-panel h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 2.2rem;
+      color: var(--red);
+      text-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+      margin-bottom: 12px;
+    }
+
+    .game-over-desc {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fca5a5;
+      margin-bottom: 24px;
+    }
+
+    /* --- Finish Panel --- */
+    .finish-panel h2 {
+      font-size: 2.4rem;
+      background: linear-gradient(135deg, #fef08a 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .finish-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg-panel-light);
+      border: 2px solid rgba(139, 92, 246, 0.25);
+      border-radius: 14px;
+      padding: 18px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .finish-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+
+    .finish-row:last-child {
+      border: 0;
+      padding-bottom: 0;
+    }
+
+    .finish-row span:last-child {
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    /* --- Animations --- */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes coinBump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes attackHero {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-12px) scale(0.95); }
+      45% { transform: translateX(50px) scale(1.1); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes attackMonster {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(12px) scale(0.95); }
+      45% { transform: translateX(-50px) scale(1.1); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes hurtEffect {
+      0%, 100% { transform: translateX(0) rotate(0); filter: brightness(1) sepia(0); }
+      20%, 60% { transform: translateX(-8px) rotate(-3deg); filter: brightness(2) sepia(1) saturate(5) hue-rotate(-50deg); }
+      40%, 80% { transform: translateX(8px) rotate(3deg); filter: brightness(2) sepia(1) saturate(5) hue-rotate(-50deg); }
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      15%, 75% { transform: translate(-6px, 2px); }
+      30%, 60% { transform: translate(5px, -2px); }
+      45% { transform: translate(-6px, -1px); }
+    }
+
+    @keyframes flashGreen {
+      0% { box-shadow: 0 0 0 0px rgba(16, 185, 129, 0.7); }
+      100% { box-shadow: 0 0 0 24px rgba(16, 185, 129, 0); }
+    }
+
+    @keyframes flashRed {
+      0% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.8); background-color: rgba(239, 68, 68, 0.15); }
+      100% { box-shadow: 0 0 0 30px rgba(239, 68, 68, 0); background-color: transparent; }
+    }
+
+    @keyframes hpBlink {
+      0% { filter: brightness(1.2); }
+      100% { filter: brightness(0.7); }
+    }
+
+    @keyframes floatUpAndOut {
+      0% { transform: translateY(0) scale(0.5); opacity: 0; }
+      20% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+      80% { transform: translateY(-50px) scale(1); opacity: 1; }
+      100% { transform: translateY(-70px) scale(0.95); opacity: 0; }
+    }
+
+    @keyframes criticalTextScale {
+      0% { opacity: 0; transform: scale(0.4) rotate(-5deg); }
+      15% { opacity: 1; transform: scale(1.15) rotate(5deg); }
+      75% { opacity: 1; transform: scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0.85) translateY(-40px); }
+    }
+
+    /* --- Responsive Queries --- */
+    @media (max-width: 768px) {
+      .battle-row {
+        grid-template-columns: 1fr;
+      }
+      .vs-divider {
+        flex-direction: row;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .vs-line {
+        display: none;
+      }
+      .answers-grid {
+        grid-template-columns: 1fr;
+      }
+      .shop-grid {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .coins-badge {
+        align-self: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-btn" href="../大冒險地圖/index.html">← 回到大地圖</a>
+
+  <!-- Loading Animation -->
+  <section class="loading" id="loading">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <h1 class="pixel-title">打怪 RPG</h1>
+      <p class="loading-desc" id="loadText">正在啟程... 載入 Google Sheets 題庫中...</p>
+    </div>
+  </section>
+
+  <!-- Main Game Arena -->
+  <main class="screen hidden" id="game">
+    <header>
+      <div>
+        <h1 class="pixel-title" style="font-size: 1.7rem; margin:0;">打怪 RPG 進階版</h1>
+        <p class="sub" id="sourceText">冒險資料讀取中</p>
+      </div>
+      <div class="coins-badge" id="coinBox">
+        <span>💰</span><span id="coins">0</span>
+      </div>
+    </header>
+
+    <section class="arena" id="arena">
+      <div class="battle-row">
+        <!-- Hero Wizard Card -->
+        <article class="fighter" id="heroCard">
+          <span class="fighter-tag">🧙 我方巫師</span>
+          <div class="sprite" id="heroSprite">🧙</div>
+          <div class="hpbar-container">
+            <div class="hpbar">
+              <div class="hpfill-catchup" id="heroHpCatchup"></div>
+              <div class="hpfill" id="heroHpFill"></div>
+            </div>
+            <p class="hptext">HP <span id="heroHp" style="font-family: 'Press Start 2P', monospace; font-size: 0.8rem;">100</span>/100</p>
+          </div>
+        </article>
+
+        <!-- VS Divider -->
+        <div class="vs-divider">
+          <div class="vs-circle">VS</div>
+        </div>
+
+        <!-- Monster Card -->
+        <article class="fighter" id="monsterCard">
+          <span class="fighter-tag name-tag" id="monsterName">🐺 野狼</span>
+          <div class="sprite" id="monsterSprite">🐺</div>
+          <div class="hpbar-container">
+            <div class="hpbar">
+              <div class="hpfill-catchup" id="monsterHpCatchup"></div>
+              <div class="hpfill" id="monsterHpFill"></div>
+            </div>
+            <p class="hptext">HP <span id="monsterHp" style="font-family: 'Press Start 2P', monospace; font-size: 0.8rem;">100</span>/100</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Dialogue/Question speech bubble -->
+      <section class="question-card">
+        <span class="question-level" id="levelText">第 1 關</span>
+        <p class="question-text" id="questionText">題目載入中...</p>
+      </section>
+
+      <!-- Options -->
+      <div class="answers-grid" id="answers"></div>
+      
+      <!-- Battle Logs message -->
+      <p class="message-banner" id="message"></p>
+
+      <!-- Actions bottom toolbar -->
+      <div class="toolbar">
+        <button class="btn-action" id="bagButton" type="button">🎒 背包</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Large floating text overlay for critical hits -->
+  <div class="critical-effect-overlay" id="criticalText">CRITICAL!</div>
+
+  <!-- Shop Overlay (Showed between levels) -->
+  <section class="overlay" id="shopOverlay">
+    <div class="panel shop-panel">
+      <h2 id="shopTitle">第 1 關 勝利！</h2>
+      <p class="shop-desc" id="shopMessage">補給一下，再挑戰下一關。</p>
+      <div class="shop-grid" id="shopGrid"></div>
+      <button class="btn-action" id="nextLevelButton" type="button" style="margin-top: 10px;">前往下一關</button>
+    </div>
+  </section>
+
+  <!-- Bag Inventory Overlay -->
+  <section class="overlay" id="bagOverlay">
+    <div class="panel">
+      <h2>🎒 巫師背包</h2>
+      <div class="bag-list" id="bagList"></div>
+      <button class="btn-action" id="closeBagButton" type="button" style="background: linear-gradient(180deg, #94a3b8 0%, #475569 100%); box-shadow: 0 5px 0 #334155; color: #fff;">關閉背包</button>
+    </div>
+  </section>
+
+  <!-- Victory End Game Overlay -->
+  <section class="overlay" id="finishOverlay">
+    <div class="panel">
+      <h2>🏆 通關成功！</h2>
+      <p style="font-size: 1.1rem; color: var(--text-muted);">太強了！你已經成功擊退所有怪物，守護了國學大陸！</p>
+      <div class="finish-grid">
+        <div class="finish-row">
+          <span>答對題數：</span>
+          <span id="finishCorrect">0</span>
+        </div>
+        <div class="finish-row">
+          <span>剩餘金幣：</span>
+          <span id="finishCoins">0</span>
+        </div>
+        <div class="finish-row">
+          <span>消耗紅藥水：</span>
+          <span id="finishPotions">0 瓶</span>
+        </div>
+      </div>
+      <button class="btn-action" id="restartButton" type="button">再次挑戰</button>
+    </div>
+  </section>
+
+  <!-- Game Over Overlay -->
+  <section class="overlay" id="gameOverOverlay">
+    <div class="panel game-over-panel">
+      <h2>GAME OVER</h2>
+      <p class="game-over-desc">巫師倒下了，挑戰失敗！重整旗鼓後再出發吧。</p>
+      <button class="btn-action" id="gameOverRestartButton" type="button" style="background: linear-gradient(180deg, var(--red) 0%, #991b1b 100%); box-shadow: 0 5px 0 #7f1d1d; color:#fff;">重新開始</button>
+    </div>
+  </section>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbxiOxBaZottYx84htDn1nXFNTyJEnkawwCR-vfGvABEQxbcdF4iYhKedf61GsXEpCz4cZnzLBk_Ll/pub?output=csv";
+    
+    // Backup offline fallback dataset
+    const FALLBACK_QUESTIONS = [
+      { question: "「一鳴驚人」的意思最接近哪一項？", correct: "突然有驚人表現", wrong: ["聲音很大", "喜歡唱歌", "嚇到別人"] },
+      { question: "臺灣北部冬季常受哪一種季風影響？", correct: "東北季風", wrong: ["西南季風", "焚風", "海陸風"] },
+      { question: "下列哪一朝代完成統一六國？", correct: "秦", wrong: ["漢", "唐", "宋"] },
+      { question: "英文單字 apple 的中文是？", correct: "蘋果", wrong: ["香蕉", "葡萄", "西瓜"] },
+      { question: "一個直角是多少度？", correct: "90 度", wrong: ["45 度", "100 度", "180 度"] },
+      { question: "「岳飛抗金」主要與哪一朝代有關？", correct: "宋", wrong: ["秦", "明", "清"] },
+      { question: "水的化學式是？", correct: "H2O", wrong: ["CO2", "O2", "NaCl"] },
+      { question: "「亡羊補牢」強調的是什麼？", correct: "及時補救", wrong: ["等待運氣", "故意欺騙", "驕傲自滿"] }
+    ];
+
+    // Monster sequence definitions
+    const MONSTERS = [
+      { icon: "🐺", name: "野狼", hp: 100 },
+      { icon: "🦂", name: "毒蠍", hp: 100 },
+      { icon: "👹", name: "惡鬼", hp: 100 },
+      { icon: "🐲", name: "巨龍", hp: 100 },
+      { icon: "👑", name: "魔王", hp: 100 }
+    ];
+
+    // Shop item configurations
+    const SHOP_ITEMS = [
+      { key: "potions", icon: "🧪", name: "紅藥水", price: 30, desc: "補 50 HP (戰鬥中也能用)" },
+      { key: "crystals", icon: "💎", name: "攻擊水晶", price: 40, desc: "下一題答對暴擊：怪物 -50 HP" },
+      { key: "charms", icon: "🛡", name: "救命符", price: 80, desc: "HP 歸零自動復活，剩 1 滴 HP" }
+    ];
+
+    // Global state
+    const state = {
+      questions: [],
+      level: 0,
+      heroHp: 100,
+      monsterHp: 100,
+      coins: 0,
+      correctCount: 0,
+      potionsUsed: 0,
+      items: { potions: 0, crystals: 0, charms: 0 },
+      currentQuestion: null,
+      locked: false
+    };
+
+    // DOM references
+    const loading = document.querySelector("#loading");
+    const game = document.querySelector("#game");
+    const loadText = document.querySelector("#loadText");
+    const sourceText = document.querySelector("#sourceText");
+    const arena = document.querySelector("#arena");
+    const coinsEl = document.querySelector("#coins");
+    const coinBox = document.querySelector("#coinBox");
+    const heroSprite = document.querySelector("#heroSprite");
+    const monsterSprite = document.querySelector("#monsterSprite");
+    const monsterName = document.querySelector("#monsterName");
+    const heroHp = document.querySelector("#heroHp");
+    const monsterHp = document.querySelector("#monsterHp");
+    const heroHpFill = document.querySelector("#heroHpFill");
+    const heroHpCatchup = document.querySelector("#heroHpCatchup");
+    const monsterHpFill = document.querySelector("#monsterHpFill");
+    const monsterHpCatchup = document.querySelector("#monsterHpCatchup");
+    const levelText = document.querySelector("#levelText");
+    const questionText = document.querySelector("#questionText");
+    const answers = document.querySelector("#answers");
+    const message = document.querySelector("#message");
+    const criticalText = document.querySelector("#criticalText");
+    
+    const shopOverlay = document.querySelector("#shopOverlay");
+    const shopTitle = document.querySelector("#shopTitle");
+    const shopMessage = document.querySelector("#shopMessage");
+    const shopGrid = document.querySelector("#shopGrid");
+    const nextLevelButton = document.querySelector("#nextLevelButton");
+    
+    const bagButton = document.querySelector("#bagButton");
+    const bagOverlay = document.querySelector("#bagOverlay");
+    const bagList = document.querySelector("#bagList");
+    const closeBagButton = document.querySelector("#closeBagButton");
+    
+    const finishOverlay = document.querySelector("#finishOverlay");
+    const finishCorrect = document.querySelector("#finishCorrect");
+    const finishCoins = document.querySelector("#finishCoins");
+    const finishPotions = document.querySelector("#finishPotions");
+    const restartButton = document.querySelector("#restartButton");
+    
+    const gameOverOverlay = document.querySelector("#gameOverOverlay");
+    const gameOverRestartButton = document.querySelector("#gameOverRestartButton");
+
+    // Initialize game
+    init();
+
+    async function init() {
+      const result = await loadQuestions();
+      state.questions = result.questions;
+      sourceText.textContent = result.fromCsv 
+        ? `已從雲端載入：${state.questions.length} 題` 
+        : `載入失敗，使用備用題庫：${state.questions.length} 題`;
+      
+      // Delay slightly for dramatic loading screen entrance
+      setTimeout(() => {
+        loading.classList.add("hidden");
+        game.classList.remove("hidden");
+        startGame();
+      }, 700);
+    }
+
+    // Load CSV questions via fetch
+    async function loadQuestions() {
+      try {
+        const response = await fetch(getFreshCsvUrl(), { cache: "no-store" });
+        if (!response.ok) throw new Error("CSV response error");
+        const csv = await response.text();
+        const parsed = parseCsv(csv);
+        const questions = rowsToQuestions(parsed);
+        if (questions.length === 0) throw new Error("CSV parsed empty");
+        return { questions, fromCsv: true };
+      } catch (error) {
+        console.warn("Fetch spreadsheet failed, using local fallback.", error);
+        return { questions: FALLBACK_QUESTIONS, fromCsv: false };
+      }
+    }
+
+    // Bypass browser caching for spreadsheets
+    function getFreshCsvUrl() {
+      const separator = CSV_URL.includes("?") ? "&" : "?";
+      return `${CSV_URL}${separator}t=${Date.now()}`;
+    }
+
+    // Parse standard comma-separated lines
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && quoted && next === '"') {
+          cell += '"';
+          i += 1;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          row.push(cell.trim());
+          cell = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+          if (char === "\r" && next === "\n") i += 1;
+          row.push(cell.trim());
+          if (row.some(Boolean)) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      return rows;
+    }
+
+    // Process array rows into clean objects
+    function rowsToQuestions(rows) {
+      return rows.slice(1).map((row) => {
+        const [question, a, b, c, d] = row;
+        if (!question || !a) return null;
+        // Exclude options named "空" or empty cells
+        const wrong = [b, c, d]
+          .map((item) => item?.trim())
+          .filter((item) => item && item !== "空" && item !== "");
+        return { question: question.trim(), correct: a.trim(), wrong };
+      }).filter(Boolean);
+    }
+
+    // Start whole adventure
+    function startGame() {
+      state.level = 0;
+      state.heroHp = 100;
+      state.coins = 0;
+      state.correctCount = 0;
+      state.potionsUsed = 0;
+      state.items = { potions: 0, crystals: 0, charms: 0 };
+      hideAllOverlays();
+      startLevel(0);
+      renderAll();
+    }
+
+    // Start specific level index
+    function startLevel(index) {
+      state.level = index;
+      state.monsterHp = MONSTERS[index].hp;
+      state.locked = false;
+      newQuestion();
+      renderAll();
+      
+      // Instantly sync catchup bars
+      syncCatchupHp();
+    }
+
+    // Retrieve random question & build answer choices
+    function newQuestion() {
+      if (state.questions.length === 0) return;
+      state.currentQuestion = state.questions[Math.floor(Math.random() * state.questions.length)];
+      state.currentQuestion.options = buildOptions(state.currentQuestion);
+    }
+
+    // Create unique dynamic options
+    function buildOptions(question) {
+      const options = [question.correct, ...question.wrong].filter(Boolean);
+      const unique = [...new Set(options)];
+      return shuffle(unique);
+    }
+
+    // Re-render entire display
+    function renderAll() {
+      const monster = MONSTERS[state.level];
+      coinsEl.textContent = state.coins;
+      heroHp.textContent = state.heroHp;
+      monsterHp.textContent = state.monsterHp;
+      monsterSprite.textContent = monster.icon;
+      monsterName.textContent = `${monster.icon} ${monster.name}`;
+      levelText.textContent = `第 ${state.level + 1} 關`;
+      questionText.textContent = state.currentQuestion?.question || "";
+      
+      setHpBar(heroHpFill, state.heroHp);
+      setHpBar(monsterHpFill, state.monsterHp);
+      
+      // Delay catchup to create double-layered effect
+      setTimeout(() => {
+        setHpBar(heroHpCatchup, state.heroHp);
+        setHpBar(monsterHpCatchup, state.monsterHp);
+      }, 350);
+
+      renderAnswers();
+    }
+
+    function syncCatchupHp() {
+      setHpBar(heroHpCatchup, state.heroHp);
+      setHpBar(monsterHpCatchup, state.monsterHp);
+    }
+
+    function setHpBar(fillElement, value) {
+      const pct = Math.max(0, Math.min(100, value));
+      fillElement.style.width = `${pct}%`;
+      if (!fillElement.classList.contains("hpfill-catchup")) {
+        fillElement.classList.toggle("mid", pct < 50 && pct >= 20);
+        fillElement.classList.toggle("low", pct < 20);
+      }
+    }
+
+    // Draw choices
+    function renderAnswers() {
+      answers.innerHTML = "";
+      if (!state.currentQuestion || !state.currentQuestion.options) return;
+      
+      state.currentQuestion.options.forEach((option, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "answer";
+        btn.type = "button";
+        btn.textContent = `${String.fromCharCode(65 + idx)}. ${option}`;
+        btn.addEventListener("click", () => chooseAnswer(btn, option));
+        btn.disabled = state.locked;
+        answers.append(btn);
+      });
+    }
+
+    // Floating text combat system
+    function showFloatingText(text, isHeroSide, isCrit = false, isType = "damage") {
+      const txt = document.createElement("div");
+      txt.className = `floating-text ${isCrit ? "crit" : ""} ${isType}`;
+      txt.textContent = text;
+
+      const targetCard = isHeroSide ? document.querySelector("#heroCard") : document.querySelector("#monsterCard");
+      const rect = targetCard.getBoundingClientRect();
+      const arenaRect = arena.getBoundingClientRect();
+
+      // Horizontal offset randomization
+      const left = rect.left - arenaRect.left + (rect.width / 2) + (Math.random() * 30 - 15);
+      const top = rect.top - arenaRect.top + 30 + (Math.random() * 20 - 10);
+
+      txt.style.left = `${left}px`;
+      txt.style.top = `${top}px`;
+
+      arena.appendChild(txt);
+
+      // Delete DOM node after animation completes
+      setTimeout(() => txt.remove(), 1050);
+    }
+
+    // Handle user option select
+    function chooseAnswer(selectedBtn, selectedOption) {
+      if (state.locked) return;
+      state.locked = true;
+
+      // Lock buttons
+      [...answers.children].forEach((btn) => btn.disabled = true);
+
+      if (selectedOption === state.currentQuestion.correct) {
+        handleCorrect(selectedBtn);
+      } else {
+        handleWrong(selectedBtn);
+      }
+    }
+
+    // Handle correct answer
+    function handleCorrect(btn) {
+      const hasCrystal = state.items.crystals > 0;
+      const damage = hasCrystal ? 50 : 25;
+      if (hasCrystal) state.items.crystals -= 1;
+
+      state.correctCount += 1;
+      addCoins(5);
+      showFloatingText("+5 💰", true, false, "gold");
+
+      state.monsterHp = Math.max(0, state.monsterHp - damage);
+      btn.classList.add("correct");
+      message.innerHTML = hasCrystal 
+        ? "✨ <span style='color:var(--gold); font-weight:900;'>暴擊！</span>攻擊水晶發動，怪物受到 50 傷害！"
+        : "答對了！你對怪物造成了 25 點魔法傷害！";
+
+      // Animations and effect flashes
+      flash(arena, hasCrystal ? "critical-flash" : "correct-flash");
+      flash(heroSprite, "attack-hero");
+      flash(monsterSprite, "hurt");
+
+      showFloatingText(hasCrystal ? "-50 HP!" : "-25 HP", false, hasCrystal, "damage");
+
+      if (hasCrystal) showCriticalEffect();
+      renderAll();
+
+      setTimeout(() => {
+        if (state.monsterHp <= 0) {
+          defeatMonster();
+        } else {
+          state.locked = false;
+          message.textContent = "";
+          newQuestion();
+          renderAll();
+        }
+      }, hasCrystal ? 1200 : 800);
+    }
+
+    // Handle wrong answer
+    function handleWrong(btn) {
+      btn.classList.add("wrong");
+      message.innerHTML = `答錯了！怪物發動反擊！正確答案：<strong style="color:var(--green);">${state.currentQuestion.correct}</strong>`;
+
+      flash(arena, "shake");
+      flash(monsterSprite, "attack-monster");
+      flash(heroSprite, "hurt");
+
+      const prevHp = state.heroHp;
+      state.heroHp = Math.max(0, state.heroHp - 25);
+      showFloatingText("-25 HP", true, false, "damage");
+      renderAll();
+
+      // Lock answers and wait 2 seconds to display correct answer
+      setTimeout(() => {
+        if (state.heroHp <= 0) {
+          handleDeath(prevHp);
+        } else {
+          state.locked = false;
+          message.textContent = "";
+          newQuestion();
+          renderAll();
+        }
+      }, 2000);
+    }
+
+    // Resolve Player Death & Revival mechanics
+    function handleDeath(prevHp) {
+      // 1. Check for Revival Charm
+      if (state.items.charms > 0) {
+        state.items.charms -= 1;
+        state.heroHp = 1;
+        message.innerHTML = "🛡️ <span style='color:var(--purple); font-weight:800;'>救命符發動！</span>抵擋了致命一擊，HP 回復為 1！";
+        showFloatingText("REVIVE!", true, true, "heal");
+        
+        state.locked = false;
+        newQuestion();
+        renderAll();
+        syncCatchupHp();
+        return;
+      }
+
+      // 2. Check for Death at HP 1
+      if (prevHp > 1) {
+        // Punish: reset current level, set HP to 1
+        state.heroHp = 1;
+        message.innerHTML = "💀 <span style='color:var(--red); font-weight:800;'>你倒下了！</span>本關卡重來，HP 被懲罰降為 1！";
+        showFloatingText("LEVEL RESET", true, false, "damage");
+        
+        setTimeout(() => {
+          startLevel(state.level);
+        }, 1500);
+        return;
+      }
+
+      // 3. True Game Over
+      gameOverOverlay.classList.add("show");
+    }
+
+    // Handle stage victory
+    function defeatMonster() {
+      const drop = randomInt(20, 50);
+      addCoins(drop);
+      showFloatingText(`+${drop} 💰`, true, false, "gold");
+      message.innerHTML = `🎉 擊敗了 <strong>${MONSTERS[state.level].name}</strong>！掉落額外 <strong>${drop}</strong> 金幣！`;
+
+      setTimeout(() => {
+        if (state.level >= MONSTERS.length - 1) {
+          showFinish();
+        } else {
+          openShop(drop);
+        }
+      }, 1500);
+    }
+
+    // Draw wood panel shop overlay
+    function openShop(drop) {
+      shopTitle.textContent = `第 ${state.level + 1} 關 挑戰成功！`;
+      shopMessage.innerHTML = `擊退怪物獲得隨機掉落的 <span style="color:var(--gold); font-weight:bold;">${drop}</span> 金幣！<br>在冒險前，你要購買些什麼？`;
+      renderShop();
+      shopOverlay.classList.add("show");
+    }
+
+    function renderShop() {
+      shopGrid.innerHTML = "";
+      SHOP_ITEMS.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "item-card";
+        card.innerHTML = `
+          <div>
+            <div class="item-icon">${item.icon}</div>
+            <h3>${item.name}</h3>
+            <p class="item-desc">${item.desc}</p>
+          </div>
+          <div>
+            <div class="item-cost">💰 ${item.price} 金幣</div>
+            <div class="item-owned">持有數量：${state.items[item.key]}</div>
+          </div>
+        `;
+        
+        const buyBtn = document.createElement("button");
+        buyBtn.className = "btn-buy";
+        buyBtn.type = "button";
+        buyBtn.textContent = "購買";
+        buyBtn.disabled = state.coins < item.price;
+        buyBtn.addEventListener("click", () => {
+          if (state.coins < item.price) return;
+          state.coins -= item.price;
+          state.items[item.key] += 1;
+          renderAll();
+          renderShop();
+        });
+        
+        card.querySelector("div:last-child").append(buyBtn);
+        shopGrid.append(card);
+      });
+    }
+
+    // Render backpack inventory overlay
+    function openBag() {
+      renderBag();
+      bagOverlay.classList.add("show");
+    }
+
+    function renderBag() {
+      bagList.innerHTML = "";
+      const rows = [
+        { key: "potions", label: "🧪 紅藥水", detail: "補 50 HP (戰鬥中也能用)", usable: true },
+        { key: "crystals", icon: "💎", label: "💎 攻擊水晶", detail: "下一題答對時發動暴擊：怪物 -50 HP", usable: false },
+        { key: "charms", icon: "🛡", label: "🛡️ 救命符", detail: "HP 歸零時自動消耗，HP 回 1 繼續", usable: false }
+      ];
+
+      rows.forEach((row) => {
+        const wrap = document.createElement("div");
+        wrap.className = "bag-row";
+        
+        wrap.innerHTML = `
+          <div class="bag-info">
+            <span class="bag-name">${row.label} × ${state.items[row.key]}</span>
+            <span class="bag-desc">${row.detail}</span>
+          </div>
+        `;
+
+        if (row.usable) {
+          const useBtn = document.createElement("button");
+          useBtn.className = "btn-use";
+          useBtn.type = "button";
+          useBtn.textContent = "使用";
+          // Disable if player has no potions or is already at full health
+          useBtn.disabled = state.items.potions <= 0 || state.heroHp >= 100;
+          useBtn.addEventListener("click", () => usePotion());
+          wrap.append(useBtn);
+        }
+        
+        bagList.append(wrap);
+      });
+    }
+
+    // Drink potion
+    function usePotion() {
+      if (state.items.potions <= 0 || state.heroHp >= 100) return;
+      state.items.potions -= 1;
+      state.potionsUsed += 1;
+      
+      const prev = state.heroHp;
+      state.heroHp = Math.min(100, state.heroHp + 50);
+      const healAmount = state.heroHp - prev;
+      
+      showFloatingText(`+${healAmount} HP`, true, false, "heal");
+      message.innerHTML = `🧪 使用了紅藥水，恢復了 <span style="color:var(--green);">${healAmount}</span> HP！`;
+      
+      renderAll();
+      renderBag();
+    }
+
+    // Display adventure completion stats
+    function showFinish() {
+      finishCorrect.textContent = `${state.correctCount} 題`;
+      finishCoins.textContent = `${state.coins} 金幣`;
+      finishPotions.textContent = `${state.potionsUsed} 瓶`;
+      finishOverlay.classList.add("show");
+      // 寫入通關憑證
+      localStorage.setItem('cert_warrior', '1');
+    }
+
+    function addCoins(amount) {
+      state.coins += amount;
+      coinBox.classList.remove("bump");
+      void coinBox.offsetWidth; // Trigger reflow for animation restart
+      coinBox.classList.add("bump");
+    }
+
+    function showCriticalEffect() {
+      criticalText.classList.remove("show");
+      void criticalText.offsetWidth;
+      criticalText.classList.add("show");
+      setTimeout(() => criticalText.classList.remove("show"), 800);
+    }
+
+    function flash(element, className) {
+      element.classList.remove(className);
+      void element.offsetWidth;
+      element.classList.add(className);
+      setTimeout(() => element.classList.remove(className), 400);
+    }
+
+    function hideAllOverlays() {
+      [shopOverlay, bagOverlay, finishOverlay, gameOverOverlay].forEach((overlay) => overlay.classList.remove("show"));
+    }
+
+    function shuffle(array) {
+      const items = [...array];
+      for (let i = items.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      return items;
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Hook listeners
+    nextLevelButton.addEventListener("click", () => {
+      shopOverlay.classList.remove("show");
+      state.heroHp = Math.max(1, state.heroHp); // Keep at least 1 HP
+      startLevel(state.level + 1);
+    });
+    
+    bagButton.addEventListener("click", openBag);
+    closeBagButton.addEventListener("click", () => bagOverlay.classList.remove("show"));
+    restartButton.addEventListener("click", startGame);
+    gameOverRestartButton.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
