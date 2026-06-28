@@ -1074,10 +1074,10 @@
   </section>
 
   <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbxiOxBaZottYx84htDn1nXFNTyJEnkawwCR-vfGvABEQxbcdF4iYhKedf61GsXEpCz4cZnzLBk_Ll/pub?output=csv";
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSMmJ5-Tejq2mwqfrfoQskhF0RuH2Mno8Ayn1FBeTYNZMpdtRfaNnxUE85sJzTf8lhNT4I6cK-xSkQX/pub?output=csv";
     
     // Backup offline fallback dataset
-    const FALLBACK_QUESTIONS = [
+    const SAMPLE_QUESTIONS = [
       { question: "「一鳴驚人」的意思最接近哪一項？", correct: "突然有驚人表現", wrong: ["聲音很大", "喜歡唱歌", "嚇到別人"] },
       { question: "臺灣北部冬季常受哪一種季風影響？", correct: "東北季風", wrong: ["西南季風", "焚風", "海陸風"] },
       { question: "下列哪一朝代完成統一六國？", correct: "秦", wrong: ["漢", "唐", "宋"] },
@@ -1179,20 +1179,48 @@
       }, 700);
     }
 
-    // Load CSV questions via fetch
+    // Sleep helper for retries
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Load CSV questions via fetch (Robust version with retries)
     async function loadQuestions() {
-      try {
-        const response = await fetch(getFreshCsvUrl(), { cache: "no-store" });
-        if (!response.ok) throw new Error("CSV response error");
-        const csv = await response.text();
-        const parsed = parseCsv(csv);
-        const questions = rowsToQuestions(parsed);
-        if (questions.length === 0) throw new Error("CSV parsed empty");
-        return { questions, fromCsv: true };
-      } catch (error) {
-        console.warn("Fetch spreadsheet failed, using local fallback.", error);
-        return { questions: FALLBACK_QUESTIONS, fromCsv: false };
+      const maxRetries = 3;
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          // 更新載入提示文字
+          if (attempt === 1) {
+            loadText.textContent = "載入題庫中…";
+          } else {
+            loadText.textContent = `網路不穩，第 ${attempt} 次重試…`;
+          }
+
+          const response = await fetch(getFreshCsvUrl(), { cache: "no-store" });
+          if (!response.ok) throw new Error("CSV response error: " + response.status);
+          
+          const csv = await response.text();
+          // 避免讀到 Google 錯誤頁面 (HTML) 卻當成 CSV 解析
+          if (csv.trim().startsWith("<")) throw new Error("Received HTML instead of CSV");
+
+          const parsed = parseCsv(csv);
+          const questions = rowsToQuestions(parsed);
+          if (questions.length === 0) throw new Error("CSV parsed empty");
+          
+          return { questions, fromCsv: true };
+        } catch (error) {
+          console.warn(`Fetch spreadsheet failed on attempt ${attempt}:`, error);
+          if (attempt < maxRetries) {
+            // 第 1 次失敗等 1 秒，第 2 次失敗等 2 秒
+            await sleep(attempt === 1 ? 1000 : 2000);
+          }
+        }
       }
+
+      // 3 次都失敗，啟用本地備用題庫
+      console.warn("All 3 fetch attempts failed, using local fallback.");
+      loadText.textContent = "載入失敗，改用內建題庫繼續";
+      await sleep(1500); // 停留 1.5 秒讓玩家看清楚訊息
+      return { questions: SAMPLE_QUESTIONS, fromCsv: false };
     }
 
     // Bypass browser caching for spreadsheets
