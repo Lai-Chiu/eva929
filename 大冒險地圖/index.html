@@ -472,6 +472,17 @@
   </div>
 </div>
 
+<!-- Ending Animation Overlay -->
+<div class="overlay" id="endingOverlay" style="background: #000; z-index: 400; padding: 0;">
+  <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;" id="endingContainer">
+    <img id="endingImg" src="結局圖1.png" style="width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s;">
+    <div style="position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 40px 20px 20px; text-align: center; border-radius: 12px;">
+      <h3 style="color: var(--gold); font-size: 1.8rem; margin-bottom: 12px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">《千古迴響，卷軸重光》</h3>
+      <p id="endingText" style="color: #fff; font-size: 1.2rem; font-weight: 700; line-height: 1.6; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"></p>
+    </div>
+  </div>
+</div>
+
 <script>
   const CERTS = [
     { key: 'cert_dynasty', slot: 'dynasty', emoji: '📜', name: '朝代之印' },
@@ -748,10 +759,48 @@
     if (slotFilled.dynasty && slotFilled.idiom && slotFilled.warrior) {
       setTimeout(() => {
         gateOverlay.classList.remove('show');
-        showVictory();
+        startEnding();
       }, 600);
     }
   }
+
+  // ── Ending Animation Logic ──
+  const ENDING_SCENES = [
+    { img: '結局圖1.png', text: '三印共鳴，沉寂千年的星門終於敞開……' },
+    { img: '結局圖2.png', text: '文字不再是枯木，它們化作金色的星辰，重新點亮了整座大陸。' },
+    { img: '結局圖3.png', text: '這不是結束。只要有人翻開書頁，這場冒險便會繼續。' },
+    { img: '結局圖4.png', text: '你已將傳承刻印於心。去吧，去書寫你自己的篇章。' }
+  ];
+  let currentEndingIndex = 0;
+  
+  const endingOverlay = document.getElementById('endingOverlay');
+  const endingImg = document.getElementById('endingImg');
+  const endingText = document.getElementById('endingText');
+
+  function startEnding() {
+    currentEndingIndex = 0;
+    showEndingScene(0);
+    endingOverlay.classList.add('show');
+  }
+
+  function showEndingScene(index) {
+    endingImg.style.opacity = 0;
+    setTimeout(() => {
+      endingImg.src = ENDING_SCENES[index].img;
+      endingText.textContent = ENDING_SCENES[index].text;
+      endingImg.style.opacity = 1;
+    }, 300);
+  }
+
+  document.getElementById('endingContainer').addEventListener('click', () => {
+    currentEndingIndex++;
+    if (currentEndingIndex < ENDING_SCENES.length) {
+      showEndingScene(currentEndingIndex);
+    } else {
+      endingOverlay.classList.remove('show');
+      showVictory();
+    }
+  });
 
   function showVictory() {
     const start = parseInt(localStorage.getItem('adventure_start') || '0', 10);
